@@ -1,0 +1,34 @@
+{
+  "name": "maddoc",
+  "version": "0.0.1",
+  "description": "You just created a new madlib project, if it's your first project you should read the following. ### Notes on Madlib Madlib is a general purpose programming language that compiles to Javascript. It means that you need to have [Nodejs](https://nodejs.org/) installed and configured in order to make it work. Madlib can target nodejs or browser, by default it will compile for nodejs. ### How to run it First, you need to compile the program: ```shell madlib compile -i src/Main.mad ``` Then, you can run it like this: ```shell node build/Main.mjs ```",
+  "main": "index.js",
+  "dependencies": {
+    "madui": "file:madlib_modules/https___github_com_madlib_lang_madui_archive_master_zip"
+  },
+  "devDependencies": {
+    "browser-sync": "^2.26.14",
+    "concurrently": "^5.3.0",
+    "copy-and-watch": "^0.1.5",
+    "sass": "^1.32.6",
+    "watch": "^1.0.2"
+  },
+  "scripts": {
+    "info": "madlib --version",
+    "build:bundle": "madlib compile -i src/Main.mad --target browser --bundle -o build/bundle.js",
+    "build:sass": "sass src/styles/main.scss build/styles/main.css",
+    "build:html": "copy-and-watch src/**/*.html build/",
+    "dev": "concurrently \"browser-sync start --server build --files build/**\" \"sass --watch src/styles/main.scss build/styles/main.css\" \"copy-and-watch --watch src/**/*.html build/\" \"copy-and-watch --watch src/assets/* build/assets/\" \"watch 'npm run build:bundle' src\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/madlib-lang/madui-examples.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/madlib-lang/madui-examples/issues"
+  },
+  "homepage": "https://github.com/madlib-lang/madui-examples#readme"
+}
