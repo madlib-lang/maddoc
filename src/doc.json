@@ -1,6 +1,25 @@
 {
   "modules": [
     {
+      "path": "/Users/a.boeglin/Code/madlib/prelude/__internal__/Dictionary.spec.mad",
+      "description": "",
+      "typeDeclarations": [
+        
+      ],
+      "aliases": [
+        
+      ],
+      "interfaces": [
+        
+      ],
+      "instances": [
+        
+      ],
+      "expressions": [
+        
+      ]
+    },
+    {
       "path": "/Users/a.boeglin/Code/madlib/prelude/__internal__/Monad.mad",
       "description": "",
       "typeDeclarations": [
@@ -1031,7 +1050,7 @@
         {
           "name": "uniqueBy",
           "description": "Makes items of a list unique given an equality functions that serves to decide\nhow items should be dedupped.\nNB: It keeps the last item that matches the binary predicate.",
-          "example": "uniqueBy(\n(a, b) => a.id == b.id,\n[\n{ id: 1, name: \"John\" },\n{ id: 2, name: \"Paul\" },\n{ id: 1, name: \"George\" },\n{ id: 4, name: \"Ringo\" }\n]\n)\n// [{ id: 2, name: \"Paul\" }, { id: 1, name: \"George\" }, { id: 4, name: \"Ringo\" }]",
+          "example": "uniqueBy(\n(a, b) => a.id == b.id,\n[\n{ id: 1, name: \"John\" },\n{ id: 2, name: \"Paul\" },\n{ id: 1, name: \"George\" },\n{ id: 4, name: \"Ringo\" }\n]\n)\n// [{ id: 1, name: \"John\" }, { id: 2, name: \"Paul\" }, { id: 4, name: \"Ringo\" }]",
           "since": "0.0.5",
           "type": "(a -> a -> Boolean) -> List a -> List a"
         },
@@ -1711,9 +1730,9 @@
       "typeDeclarations": [
         {
           "type": "ADT",
-          "description": "",
+          "description": "Dictionary is a type that represents a key - value data structure.",
           "example": "",
-          "since": "",
+          "since": "0.0.5",
           "name": "Dictionary",
           "params": "k v",
           "constructors": [
@@ -1730,9 +1749,9 @@
       "instances": [
         {
           "name": "Functor",
-          "description": "",
-          "example": "",
-          "since": "",
+          "description": "The Functor instance of Dictionary applies the given function to all values of\nthe given Dictionary.",
+          "example": "map((x) => x / 2, fromList([<\"Sidney\", 3>, <\"New York\", 18>, <\"London\", 2>]))\n// fromList([<\"Sidney\", 1.5>, <\"New York\", 9>, <\"London\", 1>])",
+          "since": "0.0.5",
           "constraints": "",
           "declaration": "Functor (Dictionary k)"
         }
@@ -1740,65 +1759,65 @@
       "expressions": [
         {
           "name": "fromList",
-          "description": "",
-          "example": "",
-          "since": "",
+          "description": "Constructs a Dictionary from a list of <key, value> tuples",
+          "example": "fromList([<1, 2>, <2, 2>])         // Dictionary that contains 2 for key 1 and 2 for key 2\nfromList([<1, 2>, <2, 2>, <2, 3>]) // Dictionary that contains 2 for key 1 and 2 for key 2",
+          "since": "0.0.5",
           "type": "List <a, b> -> Dictionary a b"
         },
         {
           "name": "empty",
-          "description": "",
+          "description": "The empty Dictionary",
           "example": "",
-          "since": "",
+          "since": "0.0.5",
           "type": "Dictionary a b"
         },
         {
           "name": "insert",
-          "description": "",
-          "example": "",
-          "since": "",
+          "description": "Inserts a value at a given key.\nNB: If the key already exists, it updates the value at that key.",
+          "example": "insert(1, 2, empty)              // fromList([<1, 2>])\ninsert(1, 7, fromList([<1, 2>])) // fromList([<1, 7>])",
+          "since": "0.0.5",
           "type": "a -> b -> Dictionary a b -> Dictionary a b"
         },
         {
           "name": "get",
-          "description": "",
-          "example": "",
-          "since": "",
+          "description": "Given a key and a Dictionary, returns Just the item at that key, or Nothing otherwise.",
+          "example": "get(\"john\", fromList([<\"john\", { age: 32 }>])) // Just({ age: 32 })\nget(\"paul\", fromList([<\"john\", { age: 32 }>])) // Nothing",
+          "since": "0.0.5",
           "type": "a -> Dictionary a b -> Maybe b"
         },
         {
           "name": "keys",
-          "description": "",
-          "example": "",
-          "since": "",
+          "description": "Returns a List of all keys in a Dictionary.",
+          "example": "keys(fromList([<true, \"Go for it\">, <false, \"NOGO\">])) // [true, false]",
+          "since": "0.0.5",
           "type": "Dictionary a b -> List a"
         },
         {
           "name": "values",
-          "description": "",
-          "example": "",
-          "since": "",
+          "description": "Returns a List of all values in a Dictionary.",
+          "example": "values(fromList([<true, \"Go for it\">, <false, \"NOGO\">])) // [\"Go for it\", \"NOGO\"]",
+          "since": "0.0.5",
           "type": "Dictionary a b -> List b"
         },
         {
           "name": "len",
-          "description": "",
-          "example": "",
-          "since": "",
+          "description": "Analog to the len for List, it returns the length of a Dictionary. In other\nwords it returns the count of how many items are currently in the Dictionary.",
+          "example": "len(fromList([<\"Sidney\", 3>, <\"New York\", 18>, <\"London\", 2>])) // 3",
+          "since": "0.0.5",
           "type": "Dictionary a b -> Number"
         },
         {
           "name": "mapWithKey",
-          "description": "",
-          "example": "",
-          "since": "",
+          "description": "Like map, it applies the given function to all items of a Dictionary. But using\nmapWithKey, the function given as first parameter also gets passed the key\ncorresponding to the value.",
+          "example": "mapWithKey(\n(city, x) => city == \"Sidney\" ? 9 : x / 2,\nfromList([<\"Sidney\", 3>, <\"New York\", 18>, <\"London\", 2>])\n)\n// fromList([<\"Sidney\", 9>, <\"New York\", 9>, <\"London\", 1>])",
+          "since": "0.0.5",
           "type": "(a -> b -> c) -> Dictionary a b -> Dictionary a c"
         },
         {
           "name": "merge",
-          "description": "",
+          "description": "merges two Dictionaries together and in case of double keys, the value from the\nfirst argument is chosen.",
           "example": "",
-          "since": "",
+          "since": "0.0.5",
           "type": "Dictionary a b -> Dictionary a b -> Dictionary a b"
         }
       ]

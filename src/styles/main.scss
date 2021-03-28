@@ -115,6 +115,14 @@ body {
   font-style: italic;
 }
 
+.definition__description {
+  margin-bottom: 20px;
+
+  > p {
+    margin: 4px 0;
+  }
+}
+
 .definition__example {
   background-color: $dark-grey;
   color: #cccccc;

@@ -5,7 +5,7 @@ import { fst, snd } from "Tuple"
 import { fromMaybe } from "Maybe"
 import J from "Json"
 import { Right, Left } from "Either"
-import { split } from "String"
+import { lines, split } from "String"
 import docJson from "./doc.json"
 import {
   Element,
@@ -124,6 +124,7 @@ deriveModuleName :: String -> String
 deriveModuleName = pipe(
   split("/"),
   last,
+  fromMaybe("???"),
   split("."),
   nth(0),
   fromMaybe("")
@@ -202,7 +203,7 @@ getTypeDefParams = where
 
 getTypeDefConstructors :: TypeDefinition -> List String
 getTypeDefConstructors = where
-  is TypeDefinition _ params ctors: ctors
+  is TypeDefinition _ _ ctors: ctors
   is _: []
 
 
@@ -289,6 +290,11 @@ ExpressionItemView :: View DocItem
 ExpressionItemView = (docItem) => {
   moduleName = where(docItem) is ExpressionItem n _  : n
   definition = where(docItem) is ExpressionItem _ def: def
+  descriptionParagraphs = pipe(
+    getDefDescription,
+    lines,
+    map((desc) => <p>{desc}</p>)
+  )(definition)
 
   return (
     <li className="definition">
@@ -301,7 +307,7 @@ ExpressionItemView = (docItem) => {
       <p className="definition__since">
         Added in v{getDefSince(definition)}
       </p>
-      <p>{getDefDescription(definition)}</p>
+      <div className="definition__description">{descriptionParagraphs}</div>
       <p className={getDefExample(definition) == "" ? "" : "definition__example"}>
         {Example(getDefExample(definition))}
       </p>
@@ -406,7 +412,7 @@ TypeItemView = (docItem) => {
     : [
       <span className="definition__constructor">
         <span className="highlight">= </span>
-        <span>{first(constructors)}</span>
+        <span>{fromMaybe("???", first(constructors))}</span>
       </span>
     ]
 
