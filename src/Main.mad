@@ -6,7 +6,7 @@ import { fromMaybe } from "Maybe"
 import J from "Json"
 import { Right, Left } from "Either"
 import { lines, split } from "String"
-import docJson from "./doc.json"
+import docJson from "./documentation.json"
 import {
   Element,
   Action,
@@ -64,7 +64,7 @@ type ModuleDocumentation = ModuleDocumentation String String (List Definition) (
 alias DocumentationData = List ModuleDocumentation
 
 parser :: J.Parser DocumentationData
-parser = J.field("modules", J.list(
+export parser = J.field("modules", J.list(
   J.map7(
     ModuleDocumentation,
     J.field("path", J.string),

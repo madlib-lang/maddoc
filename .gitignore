@@ -2,3 +2,6 @@ madlib_modules
 node_modules
 /build
 .DS_Store
+.run
+.docs
+documentation.json
