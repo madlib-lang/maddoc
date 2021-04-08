@@ -2,7 +2,7 @@ import IO from "IO"
 import { andDo } from "Monad"
 import { Wish, bad, fulfill, mapRej } from "Wish"
 import { fromMaybe, Just, Nothing } from "Maybe"
-import { nth, drop, intercalate, reduce } from "List"
+import { nth, drop, intercalate, last, reduce } from "List"
 import { split } from "String"
 import { exec, getArgs, getCurrentPath, getExecutablePath, CommandError } from "System"
 
@@ -27,18 +27,29 @@ cssTargetPath = ".docs/styles/main.css"
 htmlTargetPath :: String
 htmlTargetPath = ".docs/index.html"
 
+parentPath :: Number -> String -> String
+parentPath = (levelsUp) => pipe(
+  split("/"),
+  drop(levelsUp),
+  intercalate("/"),
+  reduce(mappend, "")
+)
+
 madDocRootPath :: Wish String String
-madDocRootPath = map(
-  pipe(
-    split("/"),
-    drop(2),
-    intercalate("/"),
-    reduce(mappend, "")
-  )
-)(getExecutablePath)
+madDocRootPath = map(parentPath(2))(getExecutablePath)
 
 sassExecutablePath :: Wish String String
-sassExecutablePath = map(mappend($, "/node_modules/.bin/sass"), madDocRootPath)
+sassExecutablePath = map(
+  (rootPath) => pipe(
+    split("/"),
+    drop(1),
+    last,
+    where
+      is Just "madlib_modules": `${parentPath(2, rootPath)}/node_modules/.bin/sass`
+      is _                    : `${rootPath}/node_modules/.bin/sass`
+  )(rootPath),
+  madDocRootPath
+)
 
 madDocSrcPath :: Wish String String
 madDocSrcPath = map(mappend($, "/src"), madDocRootPath)
