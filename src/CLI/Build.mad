@@ -1,0 +1,139 @@
+import IO from "IO"
+import { andDo } from "Monad"
+import { Wish, bad, fulfill, mapRej, parallel } from "Wish"
+import { fromMaybe, Just, Nothing } from "Maybe"
+import { nth, drop, intercalate, last, reduce } from "List"
+import { split } from "String"
+import {
+  exec,
+  getCurrentPath,
+  getExecutablePath,
+  CommandError,
+  getCommandErrorMessage
+} from "System"
+
+import { IOUtils, defaultIOUtils } from "./IOUtils"
+
+alias InputOutput = { input :: String, output :: String }
+
+export alias Config = {
+  madlib               :: InputOutput,
+  styles               :: InputOutput,
+  html                 :: InputOutput,
+  sassExecutablePath   :: String,
+  documentationDotJson :: InputOutput
+}
+
+
+JS_BUNDLE_PATH :: String
+JS_BUNDLE_PATH = ".docs/bundle.js"
+
+CSS_TARGET_PATH :: String
+CSS_TARGET_PATH = ".docs/styles/main.css"
+
+HTML_TARGET_PATH :: String
+HTML_TARGET_PATH = ".docs/index.html"
+
+
+parentPath :: Number -> String -> String
+parentPath = (levelsUp) => pipe(
+  split("/"),
+  drop(levelsUp),
+  intercalate("/"),
+  reduce(mappend, "")
+)
+
+pathToDocument :: IOUtils -> Wish String String
+export pathToDocument = pipe(
+  .getArgs,
+  map(nth(0)),
+  chain(where
+    is Just path: of(path)
+    is Nothing  : bad("You must give a path to the .mad files to document!")
+  )
+)
+
+
+madDocRootPath :: Wish String String
+madDocRootPath = map(parentPath(2))(getExecutablePath)
+
+sassExecutablePath :: Wish String String
+sassExecutablePath = map(
+  (rootPath) => pipe(
+    split("/"),
+    drop(1),
+    last,
+    where
+      is Just "madlib_modules": `${parentPath(2, rootPath)}/node_modules/.bin/sass`
+      is _                    : `${rootPath}/node_modules/.bin/sass`
+  )(rootPath),
+  madDocRootPath
+)
+
+madDocSrcPath :: Wish String String
+madDocSrcPath = map(mappend($, "/src"), madDocRootPath)
+
+documentationTargetPath :: Wish String String
+documentationTargetPath = map(mappend($, "/documentation.json"), madDocSrcPath)
+
+madDocMainPath :: Wish String String
+madDocMainPath = map(mappend($, "/Main.mad"), madDocSrcPath)
+
+sassPath :: Wish String String
+sassPath = map(mappend($, "/styles/main.scss"), madDocSrcPath)
+
+htmlSourcePath :: Wish String String
+htmlSourcePath = map(mappend($, "/index.html"), madDocSrcPath)
+
+
+generateConfiguration :: Wish String Config
+export generateConfiguration = pipe(
+  parallel,
+  map(where is [madMain, sassMain, htmlIndex, sassBin, docInput, docOutput]: {
+    madlib: { input: madMain, output: JS_BUNDLE_PATH },
+    styles: { input: sassMain, output: CSS_TARGET_PATH },
+    html: { input: htmlIndex, output: HTML_TARGET_PATH },
+    sassExecutablePath: sassBin,
+    documentationDotJson: { input: docInput, output: docOutput }
+  })
+)([madDocMainPath, sassPath, htmlSourcePath, sassExecutablePath, pathToDocument(defaultIOUtils), documentationTargetPath])
+
+
+generateJson :: Config -> Wish String String
+export generateJson = (config) => pipe(
+  (c) => `madlib doc -i ${c.documentationDotJson.input} > ${c.documentationDotJson.output}`,
+  exec,
+  mapRej(getCommandErrorMessage),
+  mapRej((err) =>
+    `An error occured while generating the docs, here is the error from madlib:\n${err}`
+  ),
+  map((_) => `Documentation built and saved in '${config.documentationDotJson.output}'`)
+)(config)
+
+
+buildBundle :: Config -> Wish String String
+buildBundle = pipe(
+  (c) => exec(`madlib compile -i ${c.madlib.input} --target browser --bundle -o ${c.madlib.output}`),
+  mapRej(getCommandErrorMessage)
+)
+
+buildSass :: Config -> Wish String String
+buildSass = pipe(
+  (c) => exec(`${c.sassExecutablePath} ${c.styles.input} ${c.styles.output}`),
+  mapRej(getCommandErrorMessage)
+)
+
+copyHtml :: Config -> Wish String String
+copyHtml = pipe(
+  (c) => exec(`cp ${c.html.input} ${c.html.output}`),
+  mapRej(getCommandErrorMessage)
+)
+
+buildDocumentation :: Config -> Wish String String
+export buildDocumentation = (config) => pipe(
+  buildBundle,
+  andDo(buildSass(config)),
+  andDo(copyHtml(config)),
+  andDo(map(mappend($, "/.docs"), getCurrentPath)),
+  map((outputPath) => `Documentation built and available in the folder '${outputPath}'`)
+)(config)

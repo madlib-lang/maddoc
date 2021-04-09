@@ -1,0 +1,9 @@
+import { getArgs } from "System"
+import { Wish } from "Wish"
+
+export alias IOUtils = {
+  getArgs :: Wish String (List String)
+}
+
+defaultIOUtils :: IOUtils
+export defaultIOUtils = { getArgs: getArgs }

@@ -2,7 +2,7 @@
   "name": "MadDoc",
   "version": "0.0.1",
   "main": "src/Main.mad",
-  "bin": "src/CLI.mad",
+  "bin": "src/CLI/Main.mad",
   "dependencies": {
     "MadUI": "https://github.com/madlib-lang/madui/archive/master.zip"
   }
