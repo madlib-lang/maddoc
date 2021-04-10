@@ -1,9 +1,10 @@
-import { getArgs } from "System"
+import { getExecutablePath, getArgs } from "System"
 import { Wish } from "Wish"
 
 export alias IOUtils = {
-  getArgs :: Wish String (List String)
+  getArgs           :: Wish String (List String),
+  getExecutablePath :: Wish String String
 }
 
 defaultIOUtils :: IOUtils
-export defaultIOUtils = { getArgs: getArgs }
+export defaultIOUtils = { getArgs: getArgs, getExecutablePath: getExecutablePath }

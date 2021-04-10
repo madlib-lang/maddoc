@@ -54,11 +54,11 @@ export pathToDocument = pipe(
 )
 
 
-madDocRootPath :: Wish String String
-madDocRootPath = map(parentPath(2))(getExecutablePath)
+madDocRootPath :: IOUtils -> Wish String String
+export madDocRootPath = (ioUtils) => map(parentPath(2), ioUtils.getExecutablePath)
 
-sassExecutablePath :: Wish String String
-sassExecutablePath = map(
+sassExecutablePath :: IOUtils -> Wish String String
+export sassExecutablePath = (ioUtils) => map(
   (rootPath) => pipe(
     split("/"),
     drop(1),
@@ -67,11 +67,11 @@ sassExecutablePath = map(
       is Just "madlib_modules": `${parentPath(2, rootPath)}/node_modules/.bin/sass`
       is _                    : `${rootPath}/node_modules/.bin/sass`
   )(rootPath),
-  madDocRootPath
+  madDocRootPath(ioUtils)
 )
 
 madDocSrcPath :: Wish String String
-madDocSrcPath = map(mappend($, "/src"), madDocRootPath)
+madDocSrcPath = map(mappend($, "/src"), madDocRootPath(defaultIOUtils))
 
 documentationTargetPath :: Wish String String
 documentationTargetPath = map(mappend($, "/documentation.json"), madDocSrcPath)
@@ -96,7 +96,14 @@ export generateConfiguration = pipe(
     sassExecutablePath: sassBin,
     documentationDotJson: { input: docInput, output: docOutput }
   })
-)([madDocMainPath, sassPath, htmlSourcePath, sassExecutablePath, pathToDocument(defaultIOUtils), documentationTargetPath])
+)([
+  madDocMainPath,
+  sassPath,
+  htmlSourcePath,
+  sassExecutablePath(defaultIOUtils),
+  pathToDocument(defaultIOUtils),
+  documentationTargetPath
+])
 
 
 generateJson :: Config -> Wish String String
