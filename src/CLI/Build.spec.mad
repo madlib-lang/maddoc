@@ -10,7 +10,9 @@ import {
   pathToDocument,
   madDocRootPath,
   sassExecutablePath,
-  madDocSrcPath
+  madDocSrcPath,
+  documentationTargetPath,
+  madDocMainPath
 } from "./Build"
 
 INITIAL_IOUTILS :: IOUtils
@@ -65,8 +67,20 @@ test("sassExecutablePath - should return the local sass install in node_modules 
   )
 }))
 
-test("madDocSrcPath - should return the path of the src folder from maddoc project", (_) => pipe(
+test("madDocSrcPath - should return the path of the src folder from MadDoc", (_) => pipe(
   madDocSrcPath,
   mapRej((_) => AssertionError(false, true)),
   chain(assertEquals($, "/home/madlib/maddoc/src"))
+)({ ...INITIAL_IOUTILS, getExecutablePath: of("/home/madlib/maddoc/.run/Main.mjs") }))
+
+test("documentationTargetPath - should return the path for the documentation.json file", (_) => pipe(
+  documentationTargetPath,
+  mapRej((_) => AssertionError(false, true)),
+  chain(assertEquals($, "/home/madlib/maddoc/src/documentation.json"))
+)({ ...INITIAL_IOUTILS, getExecutablePath: of("/home/madlib/maddoc/.run/Main.mjs") }))
+
+test("madDocMainPath - should return the path for the Main module of MadDoc", (_) => pipe(
+  madDocMainPath,
+  mapRej((_) => AssertionError(false, true)),
+  chain(assertEquals($, "/home/madlib/maddoc/src/Main.mad"))
 )({ ...INITIAL_IOUTILS, getExecutablePath: of("/home/madlib/maddoc/.run/Main.mjs") }))

@@ -71,16 +71,28 @@ export sassExecutablePath = (ioUtils) => map(
 )
 
 madDocSrcPath :: IOUtils -> Wish String String
-export madDocSrcPath = (ioUtils) => map(mappend($, "/src"), madDocRootPath(ioUtils))
+export madDocSrcPath = (ioUtils) => map(
+  mappend($, "/src"),
+  madDocRootPath(ioUtils)
+)
 
-documentationTargetPath :: Wish String String
-documentationTargetPath = map(mappend($, "/documentation.json"), madDocSrcPath(defaultIOUtils))
+documentationTargetPath :: IOUtils -> Wish String String
+export documentationTargetPath = (ioUtils) => map(
+  mappend($, "/documentation.json"),
+  madDocSrcPath(ioUtils)
+)
 
-madDocMainPath :: Wish String String
-madDocMainPath = map(mappend($, "/Main.mad"), madDocSrcPath(defaultIOUtils))
+madDocMainPath :: IOUtils -> Wish String String
+export madDocMainPath = (ioUtils) => map(
+  mappend($, "/Main.mad"),
+  madDocSrcPath(ioUtils)
+)
 
-sassPath :: Wish String String
-sassPath = map(mappend($, "/styles/main.scss"), madDocSrcPath(defaultIOUtils))
+sassPath :: IOUtils -> Wish String String
+sassPath = (ioUtils) => map(
+  mappend($, "/styles/main.scss"),
+  madDocSrcPath(ioUtils)
+)
 
 htmlSourcePath :: Wish String String
 htmlSourcePath = map(mappend($, "/index.html"), madDocSrcPath(defaultIOUtils))
@@ -97,12 +109,12 @@ export generateConfiguration = pipe(
     documentationDotJson: { input: docInput, output: docOutput }
   })
 )([
-  madDocMainPath,
-  sassPath,
+  madDocMainPath(defaultIOUtils),
+  sassPath(defaultIOUtils),
   htmlSourcePath,
   sassExecutablePath(defaultIOUtils),
   pathToDocument(defaultIOUtils),
-  documentationTargetPath
+  documentationTargetPath(defaultIOUtils)
 ])
 
 
