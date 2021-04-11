@@ -70,20 +70,20 @@ export sassExecutablePath = (ioUtils) => map(
   madDocRootPath(ioUtils)
 )
 
-madDocSrcPath :: Wish String String
-madDocSrcPath = map(mappend($, "/src"), madDocRootPath(defaultIOUtils))
+madDocSrcPath :: IOUtils -> Wish String String
+export madDocSrcPath = (ioUtils) => map(mappend($, "/src"), madDocRootPath(ioUtils))
 
 documentationTargetPath :: Wish String String
-documentationTargetPath = map(mappend($, "/documentation.json"), madDocSrcPath)
+documentationTargetPath = map(mappend($, "/documentation.json"), madDocSrcPath(defaultIOUtils))
 
 madDocMainPath :: Wish String String
-madDocMainPath = map(mappend($, "/Main.mad"), madDocSrcPath)
+madDocMainPath = map(mappend($, "/Main.mad"), madDocSrcPath(defaultIOUtils))
 
 sassPath :: Wish String String
-sassPath = map(mappend($, "/styles/main.scss"), madDocSrcPath)
+sassPath = map(mappend($, "/styles/main.scss"), madDocSrcPath(defaultIOUtils))
 
 htmlSourcePath :: Wish String String
-htmlSourcePath = map(mappend($, "/index.html"), madDocSrcPath)
+htmlSourcePath = map(mappend($, "/index.html"), madDocSrcPath(defaultIOUtils))
 
 
 generateConfiguration :: Wish String Config

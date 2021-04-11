@@ -6,7 +6,12 @@ import { andDo } from "Monad"
 import IO from "IO"
 
 import { IOUtils } from "./IOUtils"
-import { pathToDocument, madDocRootPath, sassExecutablePath } from "./Build"
+import {
+  pathToDocument,
+  madDocRootPath,
+  sassExecutablePath,
+  madDocSrcPath
+} from "./Build"
 
 INITIAL_IOUTILS :: IOUtils
 INITIAL_IOUTILS = { getArgs: of([]), getExecutablePath: of("") }
@@ -59,3 +64,9 @@ test("sassExecutablePath - should return the local sass install in node_modules 
     "/home/madlib/my-package/madlib_modules/maddoc_sanitized_url/.run/Main.mjs"
   )
 }))
+
+test("madDocSrcPath - should return the path of the src folder from maddoc project", (_) => pipe(
+  madDocSrcPath,
+  mapRej((_) => AssertionError(false, true)),
+  chain(assertEquals($, "/home/madlib/maddoc/src"))
+)({ ...INITIAL_IOUTILS, getExecutablePath: of("/home/madlib/maddoc/.run/Main.mjs") }))

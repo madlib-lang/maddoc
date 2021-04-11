@@ -9,6 +9,7 @@ npm i
 madlib install
 npm run dev
 ```
+Currently, MadDoc frontend expects a doc file named `documentation.json` to be located in the `src/` folder. You can generate this one using the `madlib doc` command. Run `madlib doc --help` for more information.
 
 ### Run the CLI
 ```bash
