@@ -31,19 +31,10 @@ import {
   InputEvent,
   render,
   inputType,
-  form,
   li,
   p,
   header,
   main,
-  section,
-  aside,
-  onKeyPress,
-  KeyPressEvent,
-  KEY_ENTER,
-  Key,
-  key,
-  empty,
   ul
 } from "MadUI"
 import IO from "IO"
@@ -448,11 +439,11 @@ ConstructorView = (separator, constructor) =>
 
 Example :: View String
 Example = (example) => {
-  lines = split("\n", example)
+  lineList = split("\n", example)
 
   return (
     <div>
-      {map((l) => <div className="example__line">{l}</div>, lines)}
+      {map((l) => <div className="example__line">{l}</div>, lineList)}
     </div>
   )
 }
