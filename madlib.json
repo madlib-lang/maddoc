@@ -4,6 +4,6 @@
   "main": "src/Main.mad",
   "bin": "src/CLI/Main.mad",
   "dependencies": {
-    "MadUI": "https://github.com/madlib-lang/madui/archive/master.zip"
+    "MadUI": "https://github.com/madlib-lang/madui/archive/refs/heads/master.zip"
   }
 }
