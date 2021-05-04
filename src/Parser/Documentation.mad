@@ -1,0 +1,130 @@
+import J from "Json"
+
+export alias Instance = {
+  declaration :: String,
+  constraints :: String
+}
+
+export alias Interface = {
+  name        :: String,
+  vars        :: String,
+  constraints :: String,
+  methods     :: List String
+}
+
+export alias Alias = {
+  name        :: String,
+  params      :: String,
+  aliasedType :: String
+}
+
+export alias Type = {
+  name         :: String,
+  params       :: String,
+  constructors :: List String
+}
+
+export alias Expression = {
+  name        :: String,
+  description :: String,
+  typing      :: String,
+  since       :: String,
+  example     :: String
+}
+
+export alias Module = {
+  path :: String,
+  name :: String,
+  description :: String,
+  expressions :: List Expression,
+  typeDeclarations :: List Type,
+  aliases :: List Alias,
+  interfaces :: List Interface,
+  instances :: List Instance
+}
+
+export alias Documentation = List Module
+
+makeInstance :: String -> String -> Instance
+makeInstance = (declaration, constraints) => ({ declaration, constraints })
+
+makeInterface :: String -> String -> String -> List String -> Interface
+makeInterface = (name, vars, constraints, methods) => ({
+  name, vars, constraints, methods
+})
+
+makeAlias :: String -> String -> String -> Alias
+makeAlias = (name, params, aliasedType) => ({ name, params, aliasedType })
+
+makeType :: String -> String -> List String -> Type
+makeType = (name, params, constructors) => ({ name, params, constructors })
+
+makeExpression :: String -> String -> String -> String -> String -> Expression
+makeExpression = (name, description, typing, since, example) => ({
+  name, description, typing, since, example
+})
+
+makeModule :: String
+           -> String
+           -> String
+           -> List Expression
+           -> List Type
+           -> List Alias
+           -> List Interface
+           -> List Instance
+           -> Module
+makeModule = (path, name, description, expressions, typeDeclarations, aliases, interfaces, instances) => ({
+  path, name, description, expressions, typeDeclarations, aliases, interfaces, instances
+})
+
+parser :: J.Parser Documentation
+export parser = J.field("modules", J.list(
+  J.map8(
+    makeModule,
+    J.field("path", J.string),
+    J.field("moduleName", J.string),
+    J.field("description", J.string),
+    J.field("expressions", J.list(
+      J.map5(
+        makeExpression,
+        J.field("name", J.string),
+        J.field("description", J.string),
+        J.field("type", J.string),
+        J.field("since", J.string),
+        J.field("example", J.string)
+      )
+    )),
+    J.field("typeDeclarations", J.list(
+      J.map3(
+        makeType,
+        J.field("name", J.string),
+        J.field("params", J.string),
+        J.field("constructors", J.list(J.string))
+      )
+    )),
+    J.field("aliases", J.list(
+      J.map3(
+        makeAlias,
+        J.field("name", J.string),
+        J.field("params", J.string),
+        J.field("aliasedType", J.string)
+      )
+    )),
+    J.field("interfaces", J.list(
+      J.map4(
+        makeInterface,
+        J.field("name", J.string),
+        J.field("vars", J.string),
+        J.field("constraints", J.string),
+        J.field("methods", J.list(J.string))
+      )
+    )),
+    J.field("instances", J.list(
+      J.map2(
+        makeInstance,
+        J.field("declaration", J.string),
+        J.field("constraints", J.string)
+      )
+    ))
+  )
+))
