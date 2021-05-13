@@ -1,0 +1,16 @@
+import {
+    Element,
+    div,
+    className,
+    text,
+    p
+  } from "MadUI"
+  import { lines } from "String"
+
+Description :: { description :: String } -> Element
+export Description = pipe(
+  .description,
+  lines,
+  map((desc) => <p>{desc}</p>),
+  (paragraphs) => <div className="definition__description">{paragraphs}</div>
+)

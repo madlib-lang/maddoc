@@ -33,14 +33,14 @@ export alias Expression = {
 }
 
 export alias Module = {
-  path :: String,
-  name :: String,
-  description :: String,
-  expressions :: List Expression,
+  path             :: String,
+  name             :: String,
+  description      :: String,
+  expressions      :: List Expression,
   typeDeclarations :: List Type,
-  aliases :: List Alias,
-  interfaces :: List Interface,
-  instances :: List Instance
+  aliases          :: List Alias,
+  interfaces       :: List Interface,
+  instances        :: List Instance
 }
 
 export alias Documentation = List Module
@@ -65,14 +65,14 @@ makeExpression = (name, description, typing, since, example) => ({
 })
 
 makeModule :: String
-           -> String
-           -> String
-           -> List Expression
-           -> List Type
-           -> List Alias
-           -> List Interface
-           -> List Instance
-           -> Module
+  -> String
+  -> String
+  -> List Expression
+  -> List Type
+  -> List Alias
+  -> List Interface
+  -> List Instance
+  -> Module
 makeModule = (path, name, description, expressions, typeDeclarations, aliases, interfaces, instances) => ({
   path, name, description, expressions, typeDeclarations, aliases, interfaces, instances
 })

@@ -1,0 +1,60 @@
+import { len, first } from "List"
+import { fromMaybe } from "Maybe"
+import {
+  Element,
+  View,
+  div,
+  span,
+  className,
+  text,
+  li
+} from "MadUI"
+import IO from "IO"
+
+import { Etiquette } from "./Etiquette"
+import { Title } from "./Title"
+
+import { Type } from "../Parser/Documentation"
+
+
+Type :: String -> Type -> Element
+export Type = (moduleName, typeDefinition) => {
+  constructors   = typeDefinition.constructors
+  manyCtors      = len(constructors) > 1
+
+  renderedConstructors = manyCtors
+    ? ConstructorsView("=", constructors)
+    : [
+      <span className="definition__constructor">
+        <span className="highlight">= </span>
+        <span>{fromMaybe("???", first(constructors))}</span>
+      </span>
+    ]
+
+  return (
+    <li className="definition">
+      {[
+          Etiquette("Type"),
+          Title(typeDefinition.name, moduleName)
+      ]}
+      <div className="definition__adt">
+        <span className="highlight">type</span>
+        <span> {typeDefinition.name} {typeDefinition.params}</span>
+        <span className="definition__constructors">{renderedConstructors}</span>
+      </div>
+    </li>
+  )
+}
+
+ConstructorsView :: String -> (List String) -> List Element
+ConstructorsView = (separator, items) => where(items)
+  is [ctor, ...more]: [ConstructorView(separator, ctor), ...ConstructorsView("|", more)]
+  is [ctor]         : [ConstructorView(separator, ctor)]
+  is []             : []
+
+ConstructorView :: String -> View String
+ConstructorView = (separator, constructor) =>
+  <div className="definition__constructor">
+    <span className="highlight">  {separator}</span>
+    <span> {constructor}</span>
+  </div>

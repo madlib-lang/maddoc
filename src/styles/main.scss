@@ -21,8 +21,31 @@ body {
   --webkit-font-smoothing: antialiased;
 }
 
+.documentation {
+  display: flex;
+  flex-direction: row;
+  min-height: 100vh;
+}
+
+.side-menu {
+  min-width: 200px;
+  padding: 20px 20px 0 20px;
+  overflow: scroll;
+  background-color: white;
+  height: calc(100vh - 100px);
+  position: sticky;
+  top: 80px;
+  border-right: 1px solid #ccc;
+}
+
+.side-menu__link {
+  cursor: pointer;
+  
+}
+
 .documentation__content {
   min-width: 230px;
+  flex-grow: 1;
   padding-left: 30px;
   padding-top: 150px;
 }
@@ -129,7 +152,8 @@ body {
   margin: 0 -15px -15px -15px;
   padding: 15px;
   font-weight: 500;
-  white-space: pre;
+  white-space: pre-wrap;
+  word-wrap: break-word;
   font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
 }
 

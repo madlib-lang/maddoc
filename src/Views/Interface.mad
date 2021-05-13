@@ -1,0 +1,43 @@
+import {
+  Element,
+  div,
+  span,
+  className,
+  text,
+  li
+} from "MadUI"
+import IO from "IO"
+
+import { Etiquette } from "./Etiquette"
+import { Title } from "./Title"
+
+import { Interface } from "../Parser/Documentation"
+
+
+Interface :: String -> Interface -> Element
+export Interface = (moduleName, interfaceDef) => {
+  methods      = interfaceDef.methods
+  constraints  = interfaceDef.constraints
+  constraintElements =
+    if (constraints != "") {[
+        <span>{constraints}</span>,
+        <span className="highlight">{` => `}</span>
+    ]} else { [] }
+
+  return (
+    <li className="definition">
+      {[
+          Etiquette("Interface"),
+          Title(interfaceDef.name, moduleName)
+      ]}
+      <div className="definition__interface">
+        <span className="highlight">interface </span>
+        <span>{constraintElements}</span>
+        <span>{interfaceDef.name} {interfaceDef.vars}</span>
+        <span className="highlight">{` {`}</span>
+        <div>{map((method) => <div>  {method}</div>, methods)}</div>
+        <span className="highlight">{`}`}</span>
+      </div>
+    </li>
+  )
+}

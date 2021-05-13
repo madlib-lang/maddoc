@@ -1,0 +1,85 @@
+import L from "List"
+import J from "Json"
+import { Just, Nothing } from "Maybe"
+import IO from "IO"
+import { always, any, equals, ifElse } from "Function"
+import { drop, split, toLower, match, len } from "String"
+import { isRootPathOf, canonicalizePath } from "FilePath/Posix"
+import {} from "Compare"
+
+import {
+  State
+} from "./State"
+
+import { Expression } from "./Views/Expression"
+
+import {
+  Module,
+  Expression
+} from "./Parser/Documentation"
+
+export type ViewType
+  = ModuleViewType (List Module)
+  | ExpressionViewType String Expression
+
+
+
+
+filterByPath :: String -> List Module -> List Module
+filterByPath = (path) => {
+  canPath = canonicalizePath(path)
+  return L.filter((module) =>
+    pipe(
+      .name,
+      toLower,
+      ifElse(
+        isRootPathOf(drop(1, toLower(canPath))),
+        always(true),
+        pipe(
+          always(module.expressions),
+          map(pipe(.name, mappend(`${module.name}/`), toLower)),
+          any(isRootPathOf(drop(1, toLower(canPath))))
+        )
+      )
+    )(module)
+  )
+}
+
+
+getModulesToShow :: State -> List Module
+export getModulesToShow = (state) => pipe(
+  filterByPath(state.path),
+  map((module) => ({
+    ...module,
+    expressions: L.filter(pipe(.name, match(state.search)), module.expressions)
+  }))
+)(state.modules)
+
+isItemView :: String -> List Module -> Boolean
+isItemView = (path) => ifElse(
+  pipe(L.len, equals(1)),
+  pipe(
+    L.first,
+    where
+      is Just m : len(canonicalizePath(path)) > len(`/${m.name}`)
+      is Nothing: false
+  ),
+  always(false)
+)
+
+computeViewType :: State -> ViewType
+export computeViewType = (state) => pipe(
+  getModulesToShow,
+  ifElse(
+    isItemView(state.path),
+    pipe(
+      L.first,
+      where is Just m: pipe(
+        .expressions,
+        L.find((e) => Just(e.name) == L.last(split("/", state.path))),
+        where is Just found: ExpressionViewType(m.name, found)
+      )(m)
+    ),
+    ModuleViewType
+  )
+)(state)

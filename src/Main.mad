@@ -1,282 +1,108 @@
-import {} from "Number"
-import { len, filter, flatten, first } from "List"
-import { fromMaybe } from "Maybe"
+import L from "List"
 import J from "Json"
 import { Right } from "Either"
-import { lines, split } from "String"
 import docJson from "./documentation.json"
 import {
-  Element,
   Action,
-  View,
-  h2,
+  Element,
+  UrlEvent,
   onInput,
   div,
-  span,
+  h2,
   input,
   className,
+  onUrlChanged,
+  syncAction,
+  getUrl,
   text,
+  p,
   placeholder,
   InputEvent,
   render,
   inputType,
-  li,
-  p,
   header,
   main,
   ul
 } from "MadUI"
 import IO from "IO"
 import { always } from "Function"
+import {} from "Compare"
+
+import {
+  State
+} from "./State"
+
+import { Expression } from "./Views/Expression"
+import { SideMenu } from "./Views/SideMenu"
+// import { Type } from "./Views/Type"
+// import { Alias } from "./Views/Alias"
+// import { Interface } from "./Views/Interface"
+// import { Instance } from "./Views/Instance"
 
 import {
   parser,
-  Expression,
-  Type,
-  Alias,
-  Interface,
-  Instance
+  Module,
+  Expression
 } from "./Parser/Documentation"
 
+import { computeViewType, getModulesToShow, ExpressionViewType, ModuleViewType, ViewType } from "./PathResolver"
 
 parsedDocumentation = J.parse(parser, docJson)
 
-
-sort :: (a -> a -> Number) -> List a -> List a
-sort = (fn, xs) => #- xs.sort(fn) -#
-
-getDocItemName :: DocItem -> String
-getDocItemName = where
-  is ExpressionItem _ def: def.name
-  is TypeItem _ def      : def.name
-  is AliasItem _ def     : def.name
-  is InterfaceItem _ def : def.name
-  is InstanceItem _ def  : def.declaration
-
-type DocItem
-  = ExpressionItem String Expression
-  | TypeItem String Type
-  | AliasItem String Alias
-  | InterfaceItem String Interface
-  | InstanceItem String Instance
-
-alias State = { docItems :: List DocItem, search :: String }
-
 initialState :: State
 initialState = where(parsedDocumentation)
-  is Right modules: pipe(
-    map((module) => [
-      ...map((exp) => ExpressionItem(module.name, exp), module.expressions),
-      ...map((typeDef) => TypeItem(module.name, typeDef), module.typeDeclarations),
-      ...map((aliasDef) => AliasItem(module.name, aliasDef), module.aliases),
-      ...map((interfac) => InterfaceItem(module.name, interfac), module.interfaces),
-      ...map((inst) => InstanceItem(module.name, inst), module.instances)
-    ]),
-    flatten,
-    (docItems) => ({ docItems: docItems, search: "" })
-  )(modules)
+  is Right modules: {
+    modules,
+    search: "",
+    path: getUrl(())
+  }
 
 
 handleInput :: Action State
 handleInput = (state, event) => where(event)
   is InputEvent e: [of(always({ ...state, search: e.target.value }))]
 
-DocApp :: View State
+
+ModuleView :: Module -> Element
+ModuleView = (module) =>
+  <div className="module">
+    <h2 className="module__title">{module.name}</h2>
+    <p className="module__description">{module.description}</p>
+    <ul>
+      {map(Expression(module.name), module.expressions)}
+    </ul>
+  </div>
+
+ContentView :: ViewType -> Element
+ContentView = where
+  is ModuleViewType modules:
+    <main className="documentation__content">
+      {map(ModuleView, modules)}
+    </main>
+
+  is ExpressionViewType moduleName exp:
+    <main className="documentation__content">
+      <ul>{Expression(moduleName, exp)}</ul>
+    </main>
+
+DocApp :: State -> Element
 DocApp = (state) => {
-  filteredItems = #- state.docItems.filter((s) => getDocItemName(s).match(state.search)) -#
+  modulesInPath = getModulesToShow(state)
+  vt = computeViewType(state)
 
   return (
     <div className="documentation">
       <header className="documentation__header">
         <input inputType="text" placeholder="What are you looking for?" className="search-field" onInput={handleInput} />
       </header>
-      <main className="documentation__content">
-        {DocItemList(filteredItems)}
-      </main>
+      {SideMenu(modulesInPath)}
+      {ContentView(vt)}
     </div>
   )
 }
 
-DocItemList :: View (List DocItem)
-DocItemList = (docItems) => <ul>{map(DocItem, docItems)}</ul>
-
-DocItem :: View DocItem
-DocItem = (docItem) => where(docItem)
-  is ExpressionItem _ _: ExpressionItemView(docItem)
-  is TypeItem _ _      : TypeItemView(docItem)
-  is AliasItem _ _     : AliasItemView(docItem)
-  is InterfaceItem _ _ : InterfaceItemView(docItem)
-  is InstanceItem _ _  : InstanceItemView(docItem)
-
-ExpressionItemView :: View DocItem
-ExpressionItemView = (docItem) => {
-  moduleName = where(docItem) is ExpressionItem n _  : n
-  definition = where(docItem) is ExpressionItem _ def: def
-  descriptionParagraphs = pipe(
-    .description,
-    lines,
-    map((desc) => <p>{desc}</p>)
-  )(definition)
-
-  return (
-    <li className="definition">
-      <div className="definition__etiquette">{`Function`}</div>
-      <h2 className="definition__title">
-        <span>{definition.name}</span>
-        <span className="definition__module">{moduleName}</span>
-      </h2>
-      <p><span className="definition__type">{definition.typing}</span></p>
-      <p className="definition__since">
-        Added in v{definition.since}
-      </p>
-      <div className="definition__description">{descriptionParagraphs}</div>
-      <p className={definition.example == "" ? "" : "definition__example"}>
-        {Example(definition.example)}
-      </p>
-    </li>
-  )
-}
-
-AliasItemView :: View DocItem
-AliasItemView = (docItem) => {
-  moduleName  = where(docItem) is AliasItem n _  : n
-  aliasDef    = where(docItem) is AliasItem _ def: def
-  aliasedType = aliasDef.aliasedType
-
-  return (
-    <li className="definition">
-      <div className="definition__etiquette">Alias</div>
-      <h2 className="definition__title">
-        <span>{aliasDef.name}</span>
-        <span className="definition__module">{moduleName}</span>
-      </h2>
-      <div className="definition__adt">
-        <span className="highlight">alias</span>
-        <span> {aliasDef.name}{aliasDef.params}</span>
-        <span className="definition__constructors">
-          <span className="definition__constructor">
-            <span className="highlight"> = </span>
-            <span>{aliasedType}</span>
-          </span>
-        </span>
-      </div>
-    </li>
-  )
-}
-
-InterfaceItemView :: View DocItem
-InterfaceItemView = (docItem) => {
-  moduleName   = where(docItem) is InterfaceItem n _  : n
-  interfaceDef = where(docItem) is InterfaceItem _ def: def
-  methods      = interfaceDef.methods
-  constraints  = interfaceDef.constraints
-  constraintElements =
-    if (constraints != "") {[
-        <span>{constraints}</span>,
-        <span className="highlight">{` => `}</span>
-    ]} else { [] }
-
-  return (
-    <li className="definition">
-      <div className="definition__etiquette">Interface</div>
-      <h2 className="definition__title">
-        <span>{interfaceDef.name}</span>
-        <span className="definition__module">{moduleName}</span>
-      </h2>
-      <div className="definition__interface">
-        <span className="highlight">interface </span>
-        <span>{constraintElements}</span>
-        <span>{interfaceDef.name} {interfaceDef.vars}</span>
-        <span className="highlight">{` {`}</span>
-        <div>{map((method) => <div>  {method}</div>, methods)}</div>
-        <span className="highlight">{`}`}</span>
-      </div>
-    </li>
-  )
-}
-
-InstanceItemView :: View DocItem
-InstanceItemView = (docItem) => {
-  moduleName   = where(docItem) is InstanceItem n _  : n
-  instanceDef  = where(docItem) is InstanceItem _ def: def
-  constraints  = instanceDef.constraints
-  constraintElements =
-    if (constraints != "") {[
-        <span>{constraints}</span>,
-        <span className="highlight">{` => `}</span>
-    ]} else { [] }
-
-  return (
-    <li className="definition">
-      <div className="definition__etiquette">Instance</div>
-      <h2 className="definition__title">
-        <span>{instanceDef.declaration}</span>
-        <span className="definition__module">{moduleName}</span>
-      </h2>
-      <div className="definition__interface">
-        <span className="highlight">instance </span>
-        <span>{constraintElements}</span>
-        <span>{instanceDef.declaration}</span>
-      </div>
-    </li>
-  )
-}
-
-TypeItemView :: View DocItem
-TypeItemView = (docItem) => {
-  moduleName     = where(docItem) is TypeItem n _  : n
-  typeDefinition = where(docItem) is TypeItem _ def: def
-  constructors   = typeDefinition.constructors
-  manyCtors      = len(constructors) > 1
-
-  renderedConstructors = manyCtors
-    ? ConstructorsView("=", constructors)
-    : [
-      <span className="definition__constructor">
-        <span className="highlight">= </span>
-        <span>{fromMaybe("???", first(constructors))}</span>
-      </span>
-    ]
-
-  return (
-    <li className="definition">
-      <div className="definition__etiquette">Type</div>
-      <h2 className="definition__title">
-        <span>{typeDefinition.name}</span>
-        <span className="definition__module">{moduleName}</span>
-      </h2>
-      <div className="definition__adt">
-        <span className="highlight">type</span>
-        <span> {typeDefinition.name} {typeDefinition.params}</span>
-        <span className="definition__constructors">{renderedConstructors}</span>
-      </div>
-    </li>
-  )
-}
-
-ConstructorsView :: String -> (List String) -> List Element
-ConstructorsView = (separator, items) => where(items)
-  is [ctor, ...more]: [ConstructorView(separator, ctor), ...ConstructorsView("|", more)]
-  is [ctor]         : [ConstructorView(separator, ctor)]
-  is []             : []
-
-ConstructorView :: String -> View String
-ConstructorView = (separator, constructor) =>
-  <div className="definition__constructor">
-    <span className="highlight">  {separator}</span>
-    <span> {constructor}</span>
-  </div>
-
-
-Example :: View String
-Example = (example) => {
-  lineList = split("\n", example)
-
-  return (
-    <div>
-      {map((l) => <div className="example__line">{l}</div>, lineList)}
-    </div>
-  )
-}
+onUrlChanged(syncAction((state, event) => where(event)
+  is UrlEvent { url }: { ...state, path: url }
+))
 
 render(DocApp, initialState, "app")

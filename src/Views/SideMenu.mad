@@ -1,0 +1,60 @@
+import L from "List"
+import {
+  Element,
+  div,
+  h2,
+  li,
+  link,
+  to,
+  className,
+  text,
+  ul
+} from "MadUI"
+import {} from "Compare"
+
+import {
+  Module,
+  Expression
+} from "../Parser/Documentation"
+
+ModuleLink :: Module -> Element
+ModuleLink = (module) =>
+  <li>
+    <link className="side-menu__link" to={`/${module.name}`}>
+      {module.name}
+    </link>
+  </li>
+
+FunctionLink :: <Expression, String> -> Element
+FunctionLink = where is <f, moduleName>:
+  <li>
+    <link className="side-menu__link" to={`/${moduleName}/${f.name}`}>
+      {f.name}
+    </link>
+  </li>
+
+FunctionLinks :: List Module -> List Element
+FunctionLinks = pipe(
+  chain((module) => pipe(
+    .expressions,
+    map((exp) => <exp, module.name>)
+  )(module)),
+  L.sortBy((a, b) => where(<a, b>)
+    is <<{ name: nameA }, _>, <{ name: nameB }, _>>:
+      compare(nameA, nameB)
+  ),
+  map(FunctionLink)
+)
+
+SideMenu :: List Module -> Element
+export SideMenu = (modules) =>
+  <div className="side-menu">
+    <h2>modules</h2>
+    <ul>
+      {map(ModuleLink, modules)}
+    </ul>
+    <h2>functions</h2>
+    <ul>
+      {FunctionLinks(modules)}
+    </ul>
+  </div>

@@ -1,0 +1,15 @@
+import {
+  Element,
+  h2,
+  span,
+  className,
+  text
+} from "MadUI"
+
+
+Title :: String -> String -> Element
+export Title = (title, moduleName) =>
+  <h2 className="definition__title">
+    <span>{title}</span>
+    <span className="definition__module">{moduleName}</span>
+  </h2>
