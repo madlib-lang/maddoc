@@ -7,3 +7,4 @@ node_modules
 .tests
 .coverage
 documentation.json
+_documentation.json

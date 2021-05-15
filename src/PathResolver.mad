@@ -1,43 +1,50 @@
-import L from "List"
+import List from "List"
 import J from "Json"
 import { Just, Nothing } from "Maybe"
-import IO from "IO"
 import { always, any, equals, ifElse } from "Function"
 import { drop, split, toLower, match, len } from "String"
-import { isRootPathOf, canonicalizePath } from "FilePath/Posix"
+import { isRootPathOf, canonicalizePath, FilePath } from "FilePath/Posix"
 import {} from "Compare"
 
 import {
   State
 } from "./State"
-
 import { Expression } from "./Views/Expression"
-
 import {
   Module,
-  Expression
+  Expression,
+  Type
 } from "./Parser/Documentation"
 
-export type ViewType
-  = ModuleViewType (List Module)
-  | ExpressionViewType String Expression
+import IO from "IO"
 
-
+export type PathResult
+  = ModuleResult (List Module)
+  | ExpressionResult String Expression
+  | TypeResult String Type
+  | NotFound
 
 
 filterByPath :: String -> List Module -> List Module
 filterByPath = (path) => {
   canPath = canonicalizePath(path)
-  return L.filter((module) =>
+
+  return List.filter((module) =>
     pipe(
       .name,
       toLower,
       ifElse(
         isRootPathOf(drop(1, toLower(canPath))),
-        always(true),
+        always(
+          !List.isEmpty(module.expressions)
+          || !List.isEmpty(module.typeDeclarations)
+        ),
         pipe(
-          always(module.expressions),
-          map(pipe(.name, mappend(`${module.name}/`), toLower)),
+          always([
+            ...map(.name, module.expressions),
+            ...map(.name, module.typeDeclarations)
+          ]),
+          map(pipe(mappend(`${module.name}/`), toLower)),
           any(isRootPathOf(drop(1, toLower(canPath))))
         )
       )
@@ -51,15 +58,15 @@ export getModulesToShow = (state) => pipe(
   filterByPath(state.path),
   map((module) => ({
     ...module,
-    expressions: L.filter(pipe(.name, match(state.search)), module.expressions)
+    expressions: List.filter(pipe(.name, match(state.search)), module.expressions)
   }))
 )(state.modules)
 
 isItemView :: String -> List Module -> Boolean
 isItemView = (path) => ifElse(
-  pipe(L.len, equals(1)),
+  pipe(List.len, equals(1)),
   pipe(
-    L.first,
+    List.first,
     where
       is Just m : len(canonicalizePath(path)) > len(`/${m.name}`)
       is Nothing: false
@@ -67,19 +74,46 @@ isItemView = (path) => ifElse(
   always(false)
 )
 
-computeViewType :: State -> ViewType
-export computeViewType = (state) => pipe(
+
+findExpression :: FilePath -> Module -> PathResult
+findExpression = (path, module) => pipe(
+  .expressions,
+  List.find((e) => Just(e.name) == List.last(split("/", path))),
+  where
+    is Just found: ExpressionResult(module.name, found)
+    is Nothing   : NotFound
+)(module)
+
+findType :: FilePath -> Module -> PathResult
+findType = (path, module) => pipe(
+  .typeDeclarations,
+  List.find((e) => Just(e.name) == List.last(split("/", path))),
+  where
+    is Just found: TypeResult(module.name, found)
+    is Nothing   : NotFound,
+  IO.log
+)(module)
+
+findItem :: FilePath -> Module -> PathResult
+findItem = (path, module) => pipe(
+  findExpression(path),
+  where
+    is NotFound: findType(path, module)
+    is a       : a,
+  IO.log
+)(module)
+
+
+processPath :: State -> PathResult
+export processPath = (state) => pipe(
   getModulesToShow,
   ifElse(
     isItemView(state.path),
     pipe(
-      L.first,
-      where is Just m: pipe(
-        .expressions,
-        L.find((e) => Just(e.name) == L.last(split("/", state.path))),
-        where is Just found: ExpressionViewType(m.name, found)
-      )(m)
+      List.first,
+      where is Just m: findItem(state.path, m)
     ),
-    ModuleViewType
-  )
+    ModuleResult
+  ),
+  IO.log
 )(state)

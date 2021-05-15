@@ -2,12 +2,13 @@ import L from "List"
 import {
   Element,
   div,
-  h2,
+  h3,
   li,
   link,
   to,
   className,
   text,
+  span,
   ul
 } from "MadUI"
 import {} from "Compare"
@@ -19,18 +20,20 @@ import {
 
 ModuleLink :: Module -> Element
 ModuleLink = (module) =>
-  <li>
+  <li className="side-menu__link-item">
     <link className="side-menu__link" to={`/${module.name}`}>
-      {module.name}
+      <span className="side-menu__link-name">{module.name}</span>
     </link>
   </li>
 
 FunctionLink :: <Expression, String> -> Element
 FunctionLink = where is <f, moduleName>:
-  <li>
+  <li className="side-menu__link-item">
     <link className="side-menu__link" to={`/${moduleName}/${f.name}`}>
-      {f.name}
+      <span className="side-menu__link-name">{f.name}</span>
+      <span className="side-menu__link-extra">{moduleName}</span>
     </link>
+
   </li>
 
 FunctionLinks :: List Module -> List Element
@@ -49,12 +52,14 @@ FunctionLinks = pipe(
 SideMenu :: List Module -> Element
 export SideMenu = (modules) =>
   <div className="side-menu">
-    <h2>modules</h2>
-    <ul>
-      {map(ModuleLink, modules)}
-    </ul>
-    <h2>functions</h2>
-    <ul>
-      {FunctionLinks(modules)}
-    </ul>
+    <div className="side-menu__scrollbar-container">
+      <h3 className="side-menu__title">MODULES</h3>
+      <ul className="side-menu__link-list">
+        {map(ModuleLink, modules)}
+      </ul>
+      <h3 className="side-menu__title">FUNCTIONS</h3>
+      <ul className="side-menu__link-list">
+        {FunctionLinks(modules)}
+      </ul>
+    </div>
   </div>

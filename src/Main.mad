@@ -6,27 +6,22 @@ import {
   Action,
   Element,
   UrlEvent,
-  onInput,
   div,
   h2,
-  input,
   className,
   onUrlChanged,
   syncAction,
   getUrl,
   text,
   p,
-  placeholder,
+  link,
+  to,
   InputEvent,
   render,
-  inputType,
-  header,
   main,
   ul
 } from "MadUI"
-import IO from "IO"
 import { always } from "Function"
-import {} from "Compare"
 
 import {
   State
@@ -34,10 +29,12 @@ import {
 
 import { Expression } from "./Views/Expression"
 import { SideMenu } from "./Views/SideMenu"
-// import { Type } from "./Views/Type"
-// import { Alias } from "./Views/Alias"
-// import { Interface } from "./Views/Interface"
-// import { Instance } from "./Views/Instance"
+import { Header } from "./Views/Header"
+import { Breadcrumbs } from "./Views/Breadcrumbs"
+import { Type } from "./Views/Type"
+import { Alias } from "./Views/Alias"
+import { Interface } from "./Views/Interface"
+import { Instance } from "./Views/Instance"
 
 import {
   parser,
@@ -45,7 +42,7 @@ import {
   Expression
 } from "./Parser/Documentation"
 
-import { computeViewType, getModulesToShow, ExpressionViewType, ModuleViewType, ViewType } from "./PathResolver"
+import { processPath, getModulesToShow, ExpressionResult, TypeResult, ModuleResult, PathResult } from "./PathResolver"
 
 parsedDocumentation = J.parse(parser, docJson)
 
@@ -66,37 +63,43 @@ handleInput = (state, event) => where(event)
 ModuleView :: Module -> Element
 ModuleView = (module) =>
   <div className="module">
-    <h2 className="module__title">{module.name}</h2>
+    <h2 className="module__title">
+      <link to={`/${module.name}`}>{module.name}</link>
+    </h2>
     <p className="module__description">{module.description}</p>
-    <ul>
+    <ul className="content__items">
+      {map(Type(module.name), module.typeDeclarations)}
+      {map(Alias(module.name), module.aliases)}
+      {map(Interface(module.name), module.interfaces)}
+      {map(Instance(module.name), module.instances)}
       {map(Expression(module.name), module.expressions)}
     </ul>
   </div>
 
-ContentView :: ViewType -> Element
+ContentView :: PathResult -> Element
 ContentView = where
-  is ModuleViewType modules:
-    <main className="documentation__content">
-      {map(ModuleView, modules)}
-    </main>
+  is ModuleResult modules:
+    <div>{map(ModuleView, modules)}</div>
 
-  is ExpressionViewType moduleName exp:
-    <main className="documentation__content">
-      <ul>{Expression(moduleName, exp)}</ul>
-    </main>
+  is ExpressionResult moduleName exp:
+    <ul className="content__items">{Expression(moduleName, exp)}</ul>
+
+  is TypeResult moduleName t:
+    <ul className="content__items">{Type(moduleName, t)}</ul>
 
 DocApp :: State -> Element
 DocApp = (state) => {
   modulesInPath = getModulesToShow(state)
-  vt = computeViewType(state)
+  pathResult = processPath(state)
 
   return (
     <div className="documentation">
-      <header className="documentation__header">
-        <input inputType="text" placeholder="What are you looking for?" className="search-field" onInput={handleInput} />
-      </header>
-      {SideMenu(modulesInPath)}
-      {ContentView(vt)}
+      {Header(())}
+      {SideMenu(state.modules)}
+      <main className="documentation__content">
+        {Breadcrumbs(state)}
+        {ContentView(pathResult)}
+      </main>
     </div>
   )
 }
