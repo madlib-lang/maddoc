@@ -6,7 +6,7 @@ import {
   text,
   li
 } from "MadUI"
-import IO from "IO"
+import String from "String"
 
 import { Etiquette } from "./Etiquette"
 import { Title } from "./Title"
@@ -17,6 +17,9 @@ import { Alias } from "../Parser/Documentation"
 Alias :: String -> Alias -> Element
 export Alias = (moduleName, aliasDef) => {
   aliasedType = aliasDef.aliasedType
+  params = String.isEmpty(aliasDef.params)
+    ? ""
+    : ` ${aliasDef.params}`
 
   return (
     <li className="definition">
@@ -26,7 +29,7 @@ export Alias = (moduleName, aliasDef) => {
       ]}
       <div className="definition__adt">
         <span className="highlight">alias</span>
-        <span> {aliasDef.name}{aliasDef.params}</span>
+        <span> {aliasDef.name}{params}</span>
         <span className="definition__constructors">
           <span className="definition__constructor">
             <span className="highlight"> = </span>

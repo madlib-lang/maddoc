@@ -13,15 +13,21 @@ import { Expression } from "./Views/Expression"
 import {
   Module,
   Expression,
+  Alias,
+  Interface,
+  Instance,
   Type
 } from "./Parser/Documentation"
 
-import IO from "IO"
+
 
 export type PathResult
   = ModuleResult (List Module)
   | ExpressionResult String Expression
   | TypeResult String Type
+  | AliasResult String Alias
+  | InterfaceResult String Interface
+  | InstanceResult String Instance
   | NotFound
 
 
@@ -42,7 +48,10 @@ filterByPath = (path) => {
         pipe(
           always([
             ...map(.name, module.expressions),
-            ...map(.name, module.typeDeclarations)
+            ...map(.name, module.typeDeclarations),
+            ...map(.name, module.aliases),
+            ...map(.name, module.interfaces),
+            ...map(.declaration, module.instances)
           ]),
           map(pipe(mappend(`${module.name}/`), toLower)),
           any(isRootPathOf(drop(1, toLower(canPath))))
@@ -90,18 +99,58 @@ findType = (path, module) => pipe(
   List.find((e) => Just(e.name) == List.last(split("/", path))),
   where
     is Just found: TypeResult(module.name, found)
-    is Nothing   : NotFound,
-  IO.log
+    is Nothing   : NotFound
 )(module)
 
-findItem :: FilePath -> Module -> PathResult
-findItem = (path, module) => pipe(
-  findExpression(path),
+findAlias :: FilePath -> Module -> PathResult
+findAlias = (path, module) => pipe(
+  .aliases,
+  List.find((e) => Just(e.name) == List.last(split("/", path))),
   where
-    is NotFound: findType(path, module)
-    is a       : a,
-  IO.log
+    is Just found: AliasResult(module.name, found)
+    is Nothing   : NotFound
 )(module)
+
+findInterface :: FilePath -> Module -> PathResult
+findInterface = (path, module) => pipe(
+  .interfaces,
+  List.find((e) => Just(e.name) == List.last(split("/", path))),
+  where
+    is Just found: InterfaceResult(module.name, found)
+    is Nothing   : NotFound
+)(module)
+
+findInstance :: FilePath -> Module -> PathResult
+findInstance = (path, module) => pipe(
+  .instances,
+  List.find((e) => Just(e.declaration) == List.last(split("/", path))),
+  where
+    is Just found: InstanceResult(module.name, found)
+    is Nothing   : NotFound
+)(module)
+
+
+alias Finder = FilePath -> Module -> PathResult
+
+_findItem :: List Finder -> FilePath -> Module -> PathResult
+_findItem = (finders, path, module) => where(finders) {
+  is [try, ...others]:
+    where(try(path, module)) {
+      is NotFound: _findItem(others, path, module)
+      is found   : found
+    }
+
+  is []: NotFound
+}
+
+findItem :: FilePath -> Module -> PathResult
+findItem = _findItem([
+  findInstance,
+  findExpression,
+  findType,
+  findAlias,
+  findInterface
+])
 
 
 processPath :: State -> PathResult
@@ -114,6 +163,5 @@ export processPath = (state) => pipe(
       where is Just m: findItem(state.path, m)
     ),
     ModuleResult
-  ),
-  IO.log
+  )
 )(state)

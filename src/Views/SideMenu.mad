@@ -1,4 +1,5 @@
-import L from "List"
+import List from "List"
+import Tuple from "Tuple"
 import {
   Element,
   div,
@@ -26,28 +27,68 @@ ModuleLink = (module) =>
     </link>
   </li>
 
-FunctionLink :: <Expression, String> -> Element
-FunctionLink = where is <f, moduleName>:
+MenuLink :: <String, String> -> Element
+MenuLink = where is <name, moduleName>:
   <li className="side-menu__link-item">
-    <link className="side-menu__link" to={`/${moduleName}/${f.name}`}>
-      <span className="side-menu__link-name">{f.name}</span>
+    <link className="side-menu__link" to={`/${moduleName}/${name}`}>
+      <span className="side-menu__link-name">{name}</span>
       <span className="side-menu__link-extra">{moduleName}</span>
     </link>
-
   </li>
 
 FunctionLinks :: List Module -> List Element
 FunctionLinks = pipe(
   chain((module) => pipe(
     .expressions,
-    map((exp) => <exp, module.name>)
+    map((exp) => <exp.name, module.name>)
   )(module)),
-  L.sortBy((a, b) => where(<a, b>)
-    is <<{ name: nameA }, _>, <{ name: nameB }, _>>:
-      compare(nameA, nameB)
-  ),
-  map(FunctionLink)
+  itemsToLinks
 )
+
+TypeLinks :: List Module -> List Element
+TypeLinks = pipe(
+  chain((module) => pipe(
+    .typeDeclarations,
+    map((typeDecl) => <typeDecl.name, module.name>)
+  )(module)),
+  itemsToLinks
+)
+
+AliasLinks :: List Module -> List Element
+AliasLinks = pipe(
+  chain((module) => pipe(
+    .aliases,
+    map((a) => <a.name, module.name>)
+  )(module)),
+  itemsToLinks
+)
+
+InterfaceLinks :: List Module -> List Element
+InterfaceLinks = pipe(
+  chain((module) => pipe(
+    .interfaces,
+    map((a) => <a.name, module.name>)
+  )(module)),
+  itemsToLinks
+)
+
+InstanceLinks :: List Module -> List Element
+InstanceLinks = pipe(
+  chain((module) => pipe(
+    .instances,
+    map((a) => <a.declaration, module.name>)
+  )(module)),
+  itemsToLinks
+)
+
+itemsToLinks :: List <String, String> -> List Element
+itemsToLinks = pipe(
+  List.sortBy((a, b) => compare(Tuple.fst(a), Tuple.fst(b))),
+  map(MenuLink)
+)
+
+sortModules :: List Module -> List Module
+sortModules = List.sortBy((a, b) => compare(a.name, b.name))
 
 SideMenu :: List Module -> Element
 export SideMenu = (modules) =>
@@ -55,11 +96,27 @@ export SideMenu = (modules) =>
     <div className="side-menu__scrollbar-container">
       <h3 className="side-menu__title">MODULES</h3>
       <ul className="side-menu__link-list">
-        {map(ModuleLink, modules)}
+        {map(ModuleLink, sortModules(modules))}
       </ul>
       <h3 className="side-menu__title">FUNCTIONS</h3>
       <ul className="side-menu__link-list">
         {FunctionLinks(modules)}
+      </ul>
+      <h3 className="side-menu__title">TYPES</h3>
+      <ul className="side-menu__link-list">
+        {TypeLinks(modules)}
+      </ul>
+      <h3 className="side-menu__title">ALIASES</h3>
+      <ul className="side-menu__link-list">
+        {AliasLinks(modules)}
+      </ul>
+      <h3 className="side-menu__title">INTERFACES</h3>
+      <ul className="side-menu__link-list">
+        {InterfaceLinks(modules)}
+      </ul>
+      <h3 className="side-menu__title">INSTANCES</h3>
+      <ul className="side-menu__link-list">
+        {InstanceLinks(modules)}
       </ul>
     </div>
   </div>

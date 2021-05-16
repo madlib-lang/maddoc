@@ -22,6 +22,7 @@ import {
   ul
 } from "MadUI"
 import { always } from "Function"
+import URL from "URL"
 
 import {
   State
@@ -42,7 +43,18 @@ import {
   Expression
 } from "./Parser/Documentation"
 
-import { processPath, getModulesToShow, ExpressionResult, TypeResult, ModuleResult, PathResult } from "./PathResolver"
+import {
+  processPath,
+  getModulesToShow,
+  ExpressionResult,
+  TypeResult,
+  AliasResult,
+  InterfaceResult,
+  InstanceResult,
+  ModuleResult,
+  PathResult
+} from "./PathResolver"
+
 
 parsedDocumentation = J.parse(parser, docJson)
 
@@ -51,7 +63,7 @@ initialState = where(parsedDocumentation)
   is Right modules: {
     modules,
     search: "",
-    path: getUrl(())
+    path: URL.decode(getUrl(()))
   }
 
 
@@ -87,11 +99,19 @@ ContentView = where
   is TypeResult moduleName t:
     <ul className="content__items">{Type(moduleName, t)}</ul>
 
+  is AliasResult moduleName t:
+    <ul className="content__items">{Alias(moduleName, t)}</ul>
+
+  is InterfaceResult moduleName t:
+    <ul className="content__items">{Interface(moduleName, t)}</ul>
+
+  is InstanceResult moduleName t:
+    <ul className="content__items">{Instance(moduleName, t)}</ul>
+
 DocApp :: State -> Element
 DocApp = (state) => {
   modulesInPath = getModulesToShow(state)
   pathResult = processPath(state)
-
   return (
     <div className="documentation">
       {Header(())}
@@ -105,7 +125,7 @@ DocApp = (state) => {
 }
 
 onUrlChanged(syncAction((state, event) => where(event)
-  is UrlEvent { url }: { ...state, path: url }
+  is UrlEvent { url }: { ...state, path: URL.decode(url) }
 ))
 
 render(DocApp, initialState, "app")
