@@ -1,4 +1,4 @@
-import { Module } from "./Parser/Documentation"
+import type { Module } from "./Parser/Documentation"
 
 export alias State = {
   modules :: List Module,

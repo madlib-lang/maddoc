@@ -1,5 +1,5 @@
+import type { Element } from "MadUI"
 import {
-  Element,
   div,
   span,
   className,
@@ -10,8 +10,11 @@ import IO from "IO"
 
 import { Etiquette } from "./Etiquette"
 import { Title } from "./Title"
+import { Since } from "./Since"
+import { Description } from "./Description"
+import { Example } from "./Example"
 
-import { Interface } from "../Parser/Documentation"
+import type { Interface } from "../Parser/Documentation"
 
 
 Interface :: String -> Interface -> Element
@@ -38,6 +41,11 @@ export Interface = (moduleName, interfaceDef) => {
         <div>{map((method) => <div>  {method}</div>, methods)}</div>
         <span className="highlight">{`}`}</span>
       </div>
+      {[
+          Since(interfaceDef),
+          Description(interfaceDef),
+          Example(interfaceDef)
+      ]}
     </li>
   )
 }

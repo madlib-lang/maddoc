@@ -1,5 +1,5 @@
+import type { Element } from "MadUI"
 import {
-  Element,
   className,
   text,
   li
@@ -12,7 +12,7 @@ import { Etiquette } from "./Etiquette"
 import { Title } from "./Title"
 import { Description } from "./Description"
 
-import { Expression } from "../Parser/Documentation"
+import type { Expression } from "../Parser/Documentation"
 
 Expression :: String -> Expression -> Element
 export Expression = (moduleName, definition) =>

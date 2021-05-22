@@ -1,16 +1,13 @@
 import List from "List"
-import J from "Json"
 import { Just, Nothing } from "Maybe"
 import { always, any, equals, ifElse } from "Function"
-import { drop, split, toLower, match, len } from "String"
-import { isRootPathOf, canonicalizePath, FilePath } from "FilePath/Posix"
+import { drop, split, toLower, len } from "String"
+import type { FilePath } from "FilePath/Posix"
+import { isRootPathOf, canonicalizePath } from "FilePath/Posix"
 import {} from "Compare"
 
-import {
-  State
-} from "./State"
-import { Expression } from "./Views/Expression"
-import {
+import type { State } from "./State"
+import type {
   Module,
   Expression,
   Alias,
@@ -44,6 +41,9 @@ filterByPath = (path) => {
         always(
           !List.isEmpty(module.expressions)
           || !List.isEmpty(module.typeDeclarations)
+          || !List.isEmpty(module.aliases)
+          || !List.isEmpty(module.interfaces)
+          || !List.isEmpty(module.instances)
         ),
         pipe(
           always([
@@ -64,12 +64,9 @@ filterByPath = (path) => {
 
 getModulesToShow :: State -> List Module
 export getModulesToShow = (state) => pipe(
-  filterByPath(state.path),
-  map((module) => ({
-    ...module,
-    expressions: List.filter(pipe(.name, match(state.search)), module.expressions)
-  }))
-)(state.modules)
+  .modules,
+  filterByPath(state.path)
+)(state)
 
 isItemView :: String -> List Module -> Boolean
 isItemView = (path) => ifElse(
@@ -83,51 +80,17 @@ isItemView = (path) => ifElse(
   always(false)
 )
 
-
-findExpression :: FilePath -> Module -> PathResult
-findExpression = (path, module) => pipe(
-  .expressions,
-  List.find((e) => Just(e.name) == List.last(split("/", path))),
+tryItemByKind :: (a -> b -> PathResult)
+  -> (b -> String)
+  -> List b
+  -> FilePath
+  -> { ...module, name :: a } -> PathResult
+tryItemByKind = (constructor, getName, items, path, module) => pipe(
+  List.find((e) => Just(getName(e)) == List.last(split("/", path))),
   where
-    is Just found: ExpressionResult(module.name, found)
+    is Just found: constructor(module.name, found)
     is Nothing   : NotFound
-)(module)
-
-findType :: FilePath -> Module -> PathResult
-findType = (path, module) => pipe(
-  .typeDeclarations,
-  List.find((e) => Just(e.name) == List.last(split("/", path))),
-  where
-    is Just found: TypeResult(module.name, found)
-    is Nothing   : NotFound
-)(module)
-
-findAlias :: FilePath -> Module -> PathResult
-findAlias = (path, module) => pipe(
-  .aliases,
-  List.find((e) => Just(e.name) == List.last(split("/", path))),
-  where
-    is Just found: AliasResult(module.name, found)
-    is Nothing   : NotFound
-)(module)
-
-findInterface :: FilePath -> Module -> PathResult
-findInterface = (path, module) => pipe(
-  .interfaces,
-  List.find((e) => Just(e.name) == List.last(split("/", path))),
-  where
-    is Just found: InterfaceResult(module.name, found)
-    is Nothing   : NotFound
-)(module)
-
-findInstance :: FilePath -> Module -> PathResult
-findInstance = (path, module) => pipe(
-  .instances,
-  List.find((e) => Just(e.declaration) == List.last(split("/", path))),
-  where
-    is Just found: InstanceResult(module.name, found)
-    is Nothing   : NotFound
-)(module)
+)(items)
 
 
 alias Finder = FilePath -> Module -> PathResult
@@ -144,13 +107,13 @@ _findItem = (finders, path, module) => where(finders) {
 }
 
 findItem :: FilePath -> Module -> PathResult
-findItem = _findItem([
-  findInstance,
-  findExpression,
-  findType,
-  findAlias,
-  findInterface
-])
+findItem = (path, module) => _findItem([
+  tryItemByKind(ExpressionResult, .name, module.expressions),
+  tryItemByKind(TypeResult, .name, module.typeDeclarations),
+  tryItemByKind(AliasResult, .name, module.aliases),
+  tryItemByKind(InterfaceResult, .name, module.interfaces),
+  tryItemByKind(InstanceResult, .declaration, module.instances)
+], path, module)
 
 
 processPath :: State -> PathResult

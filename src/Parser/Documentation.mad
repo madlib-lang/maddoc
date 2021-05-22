@@ -1,27 +1,39 @@
-import J from "Json"
+import Json from "Json"
 
 export alias Instance = {
   declaration :: String,
-  constraints :: String
+  constraints :: String,
+  description  :: String,
+  since        :: String,
+  example      :: String
 }
 
 export alias Interface = {
   name        :: String,
   vars        :: String,
   constraints :: String,
-  methods     :: List String
+  methods     :: List String,
+  description  :: String,
+  since        :: String,
+  example      :: String
 }
 
 export alias Alias = {
   name        :: String,
   params      :: String,
-  aliasedType :: String
+  aliasedType :: String,
+  description  :: String,
+  since        :: String,
+  example      :: String
 }
 
 export alias Type = {
   name         :: String,
   params       :: String,
-  constructors :: List String
+  constructors :: List String,
+  description  :: String,
+  since        :: String,
+  example      :: String
 }
 
 export alias Expression = {
@@ -45,19 +57,21 @@ export alias Module = {
 
 export alias Documentation = List Module
 
-makeInstance :: String -> String -> Instance
-makeInstance = (declaration, constraints) => ({ declaration, constraints })
+makeInstance :: String -> String -> String -> String -> String -> Instance
+makeInstance = (declaration, constraints, description, since, example) =>
+  ({ declaration, constraints, description, since, example })
 
-makeInterface :: String -> String -> String -> List String -> Interface
-makeInterface = (name, vars, constraints, methods) => ({
-  name, vars, constraints, methods
-})
+makeInterface :: String -> String -> String -> List String -> String -> String -> String -> Interface
+makeInterface = (name, vars, constraints, methods, description, since, example) =>
+  ({ name, vars, constraints, methods, description, since, example })
 
-makeAlias :: String -> String -> String -> Alias
-makeAlias = (name, params, aliasedType) => ({ name, params, aliasedType })
+makeAlias :: String -> String -> String -> String -> String -> String -> Alias
+makeAlias = (name, params, aliasedType, description, since, example) =>
+  ({ name, params, aliasedType, description, since, example })
 
-makeType :: String -> String -> List String -> Type
-makeType = (name, params, constructors) => ({ name, params, constructors })
+makeType :: String -> String -> List String -> String -> String -> String -> Type
+makeType = (name, params, constructors, description, since, example) =>
+  ({ name, params, constructors, description, since, example })
 
 makeExpression :: String -> String -> String -> String -> String -> Expression
 makeExpression = (name, description, typing, since, example) => ({
@@ -74,56 +88,75 @@ makeModule :: String
   -> List Instance
   -> Module
 makeModule = (path, name, description, expressions, typeDeclarations, aliases, interfaces, instances) => ({
-  path, name, description, expressions, typeDeclarations, aliases, interfaces, instances
+  path,
+  name,
+  description,
+  expressions,
+  typeDeclarations,
+  aliases,
+  interfaces,
+  instances
 })
 
-parser :: J.Parser Documentation
-export parser = J.field("modules", J.list(
-  J.map8(
+parser :: Json.Parser Documentation
+export parser = Json.field("modules", Json.list(
+  Json.map8(
     makeModule,
-    J.field("path", J.string),
-    J.field("moduleName", J.string),
-    J.field("description", J.string),
-    J.field("expressions", J.list(
-      J.map5(
+    Json.field("path", Json.string),
+    Json.field("moduleName", Json.string),
+    Json.field("description", Json.string),
+    Json.field("expressions", Json.list(
+      Json.map5(
         makeExpression,
-        J.field("name", J.string),
-        J.field("description", J.string),
-        J.field("type", J.string),
-        J.field("since", J.string),
-        J.field("example", J.string)
+        Json.field("name", Json.string),
+        Json.field("description", Json.string),
+        Json.field("type", Json.string),
+        Json.field("since", Json.string),
+        Json.field("example", Json.string)
       )
     )),
-    J.field("typeDeclarations", J.list(
-      J.map3(
+    Json.field("typeDeclarations", Json.list(
+      Json.map6(
         makeType,
-        J.field("name", J.string),
-        J.field("params", J.string),
-        J.field("constructors", J.list(J.string))
+        Json.field("name", Json.string),
+        Json.field("params", Json.string),
+        Json.field("constructors", Json.list(Json.string)),
+        Json.field("description", Json.string),
+        Json.field("since", Json.string),
+        Json.field("example", Json.string)
       )
     )),
-    J.field("aliases", J.list(
-      J.map3(
+    Json.field("aliases", Json.list(
+      Json.map6(
         makeAlias,
-        J.field("name", J.string),
-        J.field("params", J.string),
-        J.field("aliasedType", J.string)
+        Json.field("name", Json.string),
+        Json.field("params", Json.string),
+        Json.field("aliasedType", Json.string),
+        Json.field("description", Json.string),
+        Json.field("since", Json.string),
+        Json.field("example", Json.string)
       )
     )),
-    J.field("interfaces", J.list(
-      J.map4(
+    Json.field("interfaces", Json.list(
+      Json.map7(
         makeInterface,
-        J.field("name", J.string),
-        J.field("vars", J.string),
-        J.field("constraints", J.string),
-        J.field("methods", J.list(J.string))
+        Json.field("name", Json.string),
+        Json.field("vars", Json.string),
+        Json.field("constraints", Json.string),
+        Json.field("methods", Json.list(Json.string)),
+        Json.field("description", Json.string),
+        Json.field("since", Json.string),
+        Json.field("example", Json.string)
       )
     )),
-    J.field("instances", J.list(
-      J.map2(
+    Json.field("instances", Json.list(
+      Json.map5(
         makeInstance,
-        J.field("declaration", J.string),
-        J.field("constraints", J.string)
+        Json.field("declaration", Json.string),
+        Json.field("constraints", Json.string),
+        Json.field("description", Json.string),
+        Json.field("since", Json.string),
+        Json.field("example", Json.string)
       )
     ))
   )

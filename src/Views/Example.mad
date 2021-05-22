@@ -1,5 +1,5 @@
+import type { Element } from "MadUI"
 import {
-  Element,
   className,
   empty,
   text,
@@ -8,7 +8,7 @@ import {
 import { always, ifElse } from "Function"
 import { isEmpty } from "String"
 
-Example :: { example :: String } -> Element
+Example :: { ...a, example :: String } -> Element
 export Example = pipe(
   .example,
   ifElse(

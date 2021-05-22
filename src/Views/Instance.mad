@@ -1,17 +1,19 @@
+import type { Element } from "MadUI"
 import {
-  Element,
   div,
   span,
   className,
   text,
   li
 } from "MadUI"
-import IO from "IO"
 
 import { Etiquette } from "./Etiquette"
 import { Title } from "./Title"
+import { Since } from "./Since"
+import { Description } from "./Description"
+import { Example } from "./Example"
 
-import { Instance } from "../Parser/Documentation"
+import type { Instance } from "../Parser/Documentation"
 
 
 Instance :: String -> Instance -> Element
@@ -22,6 +24,8 @@ export Instance = (moduleName, instanceDef) => {
         <span>{constraints}</span>,
         <span className="highlight">{` => `}</span>
     ]} else { [] }
+
+  p = Title(instanceDef.declaration, moduleName)
 
   return (
     <li className="definition">
@@ -34,6 +38,11 @@ export Instance = (moduleName, instanceDef) => {
         <span>{constraintElements}</span>
         <span>{instanceDef.declaration}</span>
       </div>
+      {[
+          Since(instanceDef),
+          Description(instanceDef),
+          Example(instanceDef)
+      ]}
     </li>
   )
 }

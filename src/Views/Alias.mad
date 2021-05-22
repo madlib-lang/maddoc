@@ -1,5 +1,5 @@
+import type { Element } from "MadUI"
 import {
-  Element,
   div,
   span,
   className,
@@ -10,8 +10,11 @@ import String from "String"
 
 import { Etiquette } from "./Etiquette"
 import { Title } from "./Title"
+import { Since } from "./Since"
+import { Description } from "./Description"
+import { Example } from "./Example"
 
-import { Alias } from "../Parser/Documentation"
+import type { Alias } from "../Parser/Documentation"
 
 
 Alias :: String -> Alias -> Element
@@ -37,6 +40,11 @@ export Alias = (moduleName, aliasDef) => {
           </span>
         </span>
       </div>
+      {[
+          Since(aliasDef),
+          Description(aliasDef),
+          Example(aliasDef)
+      ]}
     </li>
   )
 }

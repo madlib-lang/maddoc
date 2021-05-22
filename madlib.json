@@ -4,6 +4,10 @@
   "main": "src/Main.mad",
   "bin": "src/CLI/Main.mad",
   "dependencies": {
-    "MadUI": "https://github.com/madlib-lang/madui/archive/refs/heads/master.zip"
+    "MadUI": "https://github.com/madlib-lang/madui/archive/refs/heads/master.zip",
+    "MarkdownRenderer": "https://github.com/madlib-lang/madmarkdown-renderer/archive/refs/heads/master.zip"
+  },
+  "importAliases": {
+    "@": "src"
   }
 }

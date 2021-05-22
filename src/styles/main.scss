@@ -38,11 +38,22 @@ a {
 // ----------------------------------------------
 
 .side-menu {
+  min-width: 300px;
   background-color: white;
   height: calc(100vh - 80px);
   position: sticky;
   top: 80px;
   border-right: 1px solid #ccc;
+  flex-shrink: 0;
+}
+
+.side-menu__no-result {
+  padding: 20px;
+  max-width: 300px;
+}
+
+.side-menu__no-result-search {
+  font-weight: 800;
 }
 
 .side-menu__scrollbar-container {
@@ -96,8 +107,7 @@ a {
 .documentation__content {
   min-width: 230px;
   flex-grow: 1;
-  padding-left: 30px;
-  padding-top: 100px;
+  padding: 100px 30px 0 30px;
 }
 
 .content__items {
@@ -151,7 +161,7 @@ a {
 
 .definition {
   font-size: 16px;
-  margin: 0 30px 30px 0;
+  margin: 0 0 30px 0;
   border: 1px solid #fff;
   -webkit-box-shadow: 0 0 0 1px #ccc;
   box-shadow: 0 0 0 1px #ccc;
@@ -246,6 +256,48 @@ a {
 
 
 // ----------------------------------------------
+// Markdown
+// ----------------------------------------------
+.markdown {
+  line-height: 1.5;
+
+  p {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  ul {
+    padding-left: 20px;
+
+    li::before {
+      content: " ";
+      font-size: 16px;
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: black;
+      border-radius: 8px;
+      margin-right: 10px;
+      margin-bottom: 2px;
+    }
+  }
+}
+
+.markdown__inline-code {
+  background-color: $background-color;
+  border-radius: 4px;
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+  padding: 2px 4px;
+}
+
+.markdown__link {
+  color: $primary-color;
+  cursor: pointer;
+}
+
+
+
+// ----------------------------------------------
 // Breadcrumbs
 // ----------------------------------------------
 
@@ -280,6 +332,11 @@ a {
 }
 
 .module__description {
-  margin: 0 0 30px 0;
+  margin: 0 0 80px 0;
   font-size: 16px;
+  background-color: white;
+  box-shadow: 0 0 0 1px #ccc;
+  border: 1px solid #fff;
+  border-radius: 2px;
+  padding: 15px;
 }

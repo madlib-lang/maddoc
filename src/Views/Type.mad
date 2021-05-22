@@ -1,20 +1,21 @@
 import { len, first } from "List"
 import { fromMaybe } from "Maybe"
+import type { Element } from "MadUI"
 import {
-  Element,
-  View,
   div,
   span,
   className,
   text,
   li
 } from "MadUI"
-import IO from "IO"
 
 import { Etiquette } from "./Etiquette"
 import { Title } from "./Title"
+import { Since } from "./Since"
+import { Description } from "./Description"
+import { Example } from "./Example"
 
-import { Type } from "../Parser/Documentation"
+import type { Type } from "../Parser/Documentation"
 
 
 Type :: String -> Type -> Element
@@ -26,7 +27,7 @@ export Type = (moduleName, typeDefinition) => {
     ? ConstructorsView("=", constructors)
     : [
       <span className="definition__constructor">
-        <span className="highlight">= </span>
+        <span className="highlight"> = </span>
         <span>{fromMaybe("???", first(constructors))}</span>
       </span>
     ]
@@ -42,6 +43,11 @@ export Type = (moduleName, typeDefinition) => {
         <span> {typeDefinition.name} {typeDefinition.params}</span>
         <span className="definition__constructors">{renderedConstructors}</span>
       </div>
+      {[
+          Since(typeDefinition),
+          Description(typeDefinition),
+          Example(typeDefinition)
+      ]}
     </li>
   )
 }
@@ -52,7 +58,7 @@ ConstructorsView = (separator, items) => where(items)
   is [ctor]         : [ConstructorView(separator, ctor)]
   is []             : []
 
-ConstructorView :: String -> View String
+ConstructorView :: String -> String -> Element
 ConstructorView = (separator, constructor) =>
   <div className="definition__constructor">
     <span className="highlight">  {separator}</span>
