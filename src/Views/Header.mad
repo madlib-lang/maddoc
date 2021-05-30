@@ -13,7 +13,7 @@ import {
 import String from "String"
 import { always } from "Function"
 
-import type { State } from "../State"
+import type { State } from "@/State"
 
 handleInput :: Action State
 handleInput = (state, event) => where(event)

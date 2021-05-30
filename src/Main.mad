@@ -1,7 +1,7 @@
 import Json from "Json"
 import String from "String"
 import { Right } from "Either"
-import docJson from "./documentation.json"
+import docJson from "@/documentation.json"
 import type { Element } from "MadUI"
 import {
   UrlEvent,
@@ -22,21 +22,21 @@ import {
 } from "MadUI"
 import URL from "URL"
 
-import type { State } from "./State"
+import type { State } from "@/State"
 
-import { Expression } from "./Views/Expression"
-import { SideMenu } from "./Views/SideMenu"
-import { Header } from "./Views/Header"
-import { Breadcrumbs } from "./Views/Breadcrumbs"
-import { Type } from "./Views/Type"
-import { Alias } from "./Views/Alias"
-import { Interface } from "./Views/Interface"
-import { Instance } from "./Views/Instance"
+import { Expression } from "@/Views/Expression"
+import { SideMenu } from "@/Views/SideMenu"
+import { Header } from "@/Views/Header"
+import { Breadcrumbs } from "@/Views/Breadcrumbs"
+import { Type } from "@/Views/Type"
+import { Alias } from "@/Views/Alias"
+import { Interface } from "@/Views/Interface"
+import { Instance } from "@/Views/Instance"
 
-import type { Module } from "./Parser/Documentation"
-import { parser } from "./Parser/Documentation"
+import type { Module } from "@/Parser/Documentation"
+import { parser } from "@/Parser/Documentation"
 
-import type { PathResult } from "./PathResolver"
+import type { PathResult } from "@/PathResolver"
 import {
   processPath,
   getModulesToShow,
@@ -46,9 +46,9 @@ import {
   InterfaceResult,
   InstanceResult,
   ModuleResult
-} from "./PathResolver"
+} from "@/PathResolver"
 
-import { renderMarkdown } from "./Markdown"
+import { renderMarkdown } from "@/Markdown"
 
 
 parsedDocumentation = Json.parse(parser, docJson)

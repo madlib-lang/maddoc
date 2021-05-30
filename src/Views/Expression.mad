@@ -5,14 +5,14 @@ import {
   li
 } from "MadUI"
 
-import { Example } from "./Example"
-import { Since } from "./Since"
-import { Typing } from "./Typing"
-import { Etiquette } from "./Etiquette"
-import { Title } from "./Title"
-import { Description } from "./Description"
+import { Etiquette } from "@/Views/Etiquette"
+import { Title } from "@/Views/Title"
+import { Since } from "@/Views/Since"
+import { Description } from "@/Views/Description"
+import { Example } from "@/Views/Example"
+import { Typing } from "@/Views/Typing"
 
-import type { Expression } from "../Parser/Documentation"
+import type { Expression } from "@/Parser/Documentation"
 
 Expression :: String -> Expression -> Element
 export Expression = (moduleName, definition) =>

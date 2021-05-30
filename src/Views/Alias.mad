@@ -8,13 +8,13 @@ import {
 } from "MadUI"
 import String from "String"
 
-import { Etiquette } from "./Etiquette"
-import { Title } from "./Title"
-import { Since } from "./Since"
-import { Description } from "./Description"
-import { Example } from "./Example"
+import { Etiquette } from "@/Views/Etiquette"
+import { Title } from "@/Views/Title"
+import { Since } from "@/Views/Since"
+import { Description } from "@/Views/Description"
+import { Example } from "@/Views/Example"
 
-import type { Alias } from "../Parser/Documentation"
+import type { Alias } from "@/Parser/Documentation"
 
 
 Alias :: String -> Alias -> Element

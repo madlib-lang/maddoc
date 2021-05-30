@@ -6,7 +6,7 @@ import type { FilePath } from "FilePath/Posix"
 import { isRootPathOf, canonicalizePath } from "FilePath/Posix"
 import {} from "Compare"
 
-import type { State } from "./State"
+import type { State } from "@/State"
 import type {
   Module,
   Expression,
@@ -14,7 +14,7 @@ import type {
   Interface,
   Instance,
   Type
-} from "./Parser/Documentation"
+} from "@/Parser/Documentation"
 
 
 

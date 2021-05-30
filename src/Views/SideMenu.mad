@@ -17,7 +17,7 @@ import {
 } from "MadUI"
 import {} from "Compare"
 
-import type { Module } from "../Parser/Documentation"
+import type { Module } from "@/Parser/Documentation"
 
 ModuleLink :: Module -> Element
 ModuleLink = (module) =>
@@ -97,7 +97,7 @@ export SideMenu = (search, modules) => {
     ? (
         <div className="side-menu">
           <p className="side-menu__no-result">
-            No result was found for '<span className="side-menu__no-result-search">{search}</span>'
+            No result was found for <span className="side-menu__no-result-search">{search}</span>
           </p>
         </div>
       )

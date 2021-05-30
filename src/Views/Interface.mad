@@ -6,15 +6,14 @@ import {
   text,
   li
 } from "MadUI"
-import IO from "IO"
 
-import { Etiquette } from "./Etiquette"
-import { Title } from "./Title"
-import { Since } from "./Since"
-import { Description } from "./Description"
-import { Example } from "./Example"
+import { Etiquette } from "@/Views/Etiquette"
+import { Title } from "@/Views/Title"
+import { Since } from "@/Views/Since"
+import { Description } from "@/Views/Description"
+import { Example } from "@/Views/Example"
 
-import type { Interface } from "../Parser/Documentation"
+import type { Interface } from "@/Parser/Documentation"
 
 
 Interface :: String -> Interface -> Element

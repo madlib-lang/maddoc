@@ -14,7 +14,7 @@ import { snd } from "Tuple"
 import {} from "Number"
 import { canonicalizePath, joinPath, splitPath } from "FilePath/Posix"
 
-import type { State } from "../State"
+import type { State } from "@/State"
 
 
 type Breadcrumb = Breadcrumb String String

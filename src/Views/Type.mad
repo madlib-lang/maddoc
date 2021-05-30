@@ -15,7 +15,7 @@ import { Since } from "./Since"
 import { Description } from "./Description"
 import { Example } from "./Example"
 
-import type { Type } from "../Parser/Documentation"
+import type { Type } from "@/Parser/Documentation"
 
 
 Type :: String -> Type -> Element

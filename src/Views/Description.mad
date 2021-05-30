@@ -4,7 +4,7 @@ import {
   className,
   text
 } from "MadUI"
-import { renderMarkdown } from "../Markdown"
+import { renderMarkdown } from "@/Markdown"
 
 
 Description :: { ...a, description :: String } -> Element
