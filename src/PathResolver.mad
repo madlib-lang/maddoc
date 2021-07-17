@@ -19,12 +19,12 @@ import type {
 
 
 export type PathResult
-  = ModuleResult (List Module)
-  | ExpressionResult String Expression
-  | TypeResult String Type
-  | AliasResult String Alias
-  | InterfaceResult String Interface
-  | InstanceResult String Instance
+  = ModuleResult(List Module)
+  | ExpressionResult(String, Expression)
+  | TypeResult(String, Type)
+  | AliasResult(String, Alias)
+  | InterfaceResult(String, Interface)
+  | InstanceResult(String, Instance)
   | NotFound
 
 
@@ -73,9 +73,10 @@ isItemView = (path) => ifElse(
   pipe(List.len, equals(1)),
   pipe(
     List.first,
-    where
-      is Just m : len(canonicalizePath(path)) > len(`/${m.name}`)
-      is Nothing: false
+    where {
+      Just(m) => len(canonicalizePath(path)) > len(`/${m.name}`)
+      Nothing => false
+    }
   ),
   always(false)
 )
@@ -87,9 +88,10 @@ tryItemByKind :: (a -> b -> PathResult)
   -> { ...module, name :: a } -> PathResult
 tryItemByKind = (constructor, getName, items, path, module) => pipe(
   List.find((e) => Just(getName(e)) == List.last(split("/", path))),
-  where
-    is Just found: constructor(module.name, found)
-    is Nothing   : NotFound
+  where {
+    Just(found) => constructor(module.name, found)
+    Nothing    => NotFound
+  }
 )(items)
 
 
@@ -97,13 +99,14 @@ alias Finder = FilePath -> Module -> PathResult
 
 _findItem :: List Finder -> FilePath -> Module -> PathResult
 _findItem = (finders, path, module) => where(finders) {
-  is [try, ...others]:
+  [try, ...others] =>
     where(try(path, module)) {
-      is NotFound: _findItem(others, path, module)
-      is found   : found
+      NotFound => _findItem(others, path, module)
+      found => found
     }
 
-  is []: NotFound
+  [] =>
+    NotFound
 }
 
 findItem :: FilePath -> Module -> PathResult
@@ -123,7 +126,7 @@ export processPath = (state) => pipe(
     isItemView(state.path),
     pipe(
       List.first,
-      where is Just m: findItem(state.path, m)
+      where { Just(m) => findItem(state.path, m) }
     ),
     ModuleResult
   )

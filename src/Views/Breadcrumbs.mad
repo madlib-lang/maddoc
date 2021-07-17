@@ -17,10 +17,10 @@ import { canonicalizePath, joinPath, splitPath } from "FilePath/Posix"
 import type { State } from "@/State"
 
 
-type Breadcrumb = Breadcrumb String String
+type Breadcrumb = Breadcrumb(String, String)
 
-getLink = where is Breadcrumb _ l: l
-getName = where is Breadcrumb l _: l
+getLink = where { Breadcrumb(_, l) => l }
+getName = where { Breadcrumb(l, _) => l }
 
 
 generateBreadcrumbName :: String -> String
@@ -36,17 +36,20 @@ computeBreadcrumbs = pipe(
   .path,
   splitPath,
   reduce((acc, pathSegment) =>
-    where(acc) is <prevPath, breadcrumbs>: pipe(
-      append(pathSegment),
-      joinPath,
-      (path) => <
-        path,
-        append(
-          Breadcrumb(generateBreadcrumbName(pathSegment), path),
-          breadcrumbs
-        )
-      >
-    )([prevPath]),
+    where(acc) {
+      <prevPath, breadcrumbs> =>
+        pipe(
+          append(pathSegment),
+          joinPath,
+          (path) => <
+            path,
+            append(
+              Breadcrumb(generateBreadcrumbName(pathSegment), path),
+              breadcrumbs
+            )
+          >
+        )([prevPath])
+    },
     <"", []>
   ),
   snd

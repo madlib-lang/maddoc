@@ -8,3 +8,4 @@ node_modules
 .coverage
 documentation.json
 _documentation.json
+.module_cache

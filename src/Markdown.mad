@@ -5,8 +5,8 @@ import {
   link,
   to
 } from "MadUI"
-import type { Config } from "MarkdownRenderer"
-import { renderMarkdownWithConfig, defaultConfig, setLinkView } from "MarkdownRenderer"
+import type { Config } from "MadMarkdownRenderer"
+import { renderMarkdownWithConfig, defaultConfig, setLinkView } from "MadMarkdownRenderer"
 
 mdConfig :: Config
 mdConfig = pipe(

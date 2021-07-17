@@ -28,13 +28,14 @@ ModuleLink = (module) =>
   </li>
 
 MenuLink :: <String, String> -> Element
-MenuLink = where is <name, moduleName>:
+MenuLink = where { <name, moduleName> =>
   <li className="side-menu__link-item">
     <link className="side-menu__link" to={`/${moduleName}/${name}`}>
       <span className="side-menu__link-name">{name}</span>
       <span className="side-menu__link-extra">{moduleName}</span>
     </link>
   </li>
+}
 
 LinksForType :: String
   -> ({ ...a, name :: String } -> List b)

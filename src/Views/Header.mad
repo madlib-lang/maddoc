@@ -16,8 +16,9 @@ import { always } from "Function"
 import type { State } from "@/State"
 
 handleInput :: Action State
-handleInput = (state, event) => where(event)
-  is InputEvent e: [of(always({ ...state, search: String.toLower(e.target.value) }))]
+handleInput = (state, event) => where(event) {
+  InputEvent(e) => [of(always({ ...state, search: String.toLower(e.target.value) }))]
+}
 
 Header :: () -> Element
 export Header = (_) => 

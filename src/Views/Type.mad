@@ -53,10 +53,11 @@ export Type = (moduleName, typeDefinition) => {
 }
 
 ConstructorsView :: String -> (List String) -> List Element
-ConstructorsView = (separator, items) => where(items)
-  is [ctor, ...more]: [ConstructorView(separator, ctor), ...ConstructorsView("|", more)]
-  is [ctor]         : [ConstructorView(separator, ctor)]
-  is []             : []
+ConstructorsView = (separator, items) => where(items) {
+  [ctor, ...more] => [ConstructorView(separator, ctor), ...ConstructorsView("|", more)]
+  [ctor]          => [ConstructorView(separator, ctor)]
+  []              => []
+}
 
 ConstructorView :: String -> String -> Element
 ConstructorView = (separator, constructor) =>

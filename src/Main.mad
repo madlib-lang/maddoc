@@ -54,12 +54,14 @@ import { renderMarkdown } from "@/Markdown"
 parsedDocumentation = Json.parse(parser, docJson)
 
 initialState :: State
-initialState = where(parsedDocumentation)
-  is Right modules: {
-    modules,
-    search: "",
-    path: URL.decode(getUrl(()))
-  }
+initialState = where(parsedDocumentation) {
+  Right(modules) =>
+    {
+      modules,
+      search: "",
+      path: URL.decode(getUrl(()))
+    }
+}
 
 
 ModuleView :: Module -> Element
@@ -82,25 +84,28 @@ ModuleView = (module) =>
     </ul>
   </div>
 
+
 ContentView :: PathResult -> Element
-ContentView = where
-  is ModuleResult modules:
+ContentView = where {
+  ModuleResult(modules) =>
     <div>{map(ModuleView, modules)}</div>
 
-  is ExpressionResult moduleName exp:
+  ExpressionResult(moduleName, exp) =>
     <ul className="content__items">{Expression(moduleName, exp)}</ul>
 
-  is TypeResult moduleName t:
+  TypeResult(moduleName, t) =>
     <ul className="content__items">{Type(moduleName, t)}</ul>
 
-  is AliasResult moduleName t:
+  AliasResult(moduleName, t) =>
     <ul className="content__items">{Alias(moduleName, t)}</ul>
 
-  is InterfaceResult moduleName t:
+  InterfaceResult(moduleName, t) =>
     <ul className="content__items">{Interface(moduleName, t)}</ul>
 
-  is InstanceResult moduleName t:
+  InstanceResult(moduleName, t) =>
     <ul className="content__items">{Instance(moduleName, t)}</ul>
+}
+
 
 DocApp :: State -> Element
 DocApp = (state) => {
@@ -118,8 +123,8 @@ DocApp = (state) => {
   )
 }
 
-onUrlChanged(syncAction((state, event) => where(event)
-  is UrlEvent { url }: { ...state, path: URL.decode(url) }
-))
+onUrlChanged(syncAction((state, event) => where(event) {
+  UrlEvent({ url }) => { ...state, path: URL.decode(url) }
+}))
 
 render(DocApp, initialState, "app")
