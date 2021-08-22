@@ -1,0 +1,99 @@
+import String from "String"
+import List from "List"
+
+
+
+type Environment = Environment(Number, Boolean, String)
+
+getIndentLevel :: Environment -> Number
+getIndentLevel = where {
+  Environment(indentLevel, _, _) => indentLevel
+}
+
+getData :: Environment -> String
+getData = where {
+  Environment(_, _, data) => data
+}
+
+append :: Environment -> String -> Environment
+append = (env, str) => where(env) {
+  Environment(indentLevel, skipEmpty, out) =>
+    Environment(indentLevel, skipEmpty, out ++ str)
+}
+
+incIndentLevel :: Environment -> Environment
+incIndentLevel = where {
+  Environment(indentLevel, skipEmpty, out) =>
+    Environment(indentLevel + 1, skipEmpty, out)
+}
+
+decIndentLevel :: Environment -> Environment
+decIndentLevel = where {
+  Environment(indentLevel, skipEmpty, out) =>
+    Environment(indentLevel - 1, skipEmpty, out)
+}
+
+setSkipEmpty :: Boolean -> Environment -> Environment
+setSkipEmpty = (skipEmpty, env) => where(env) {
+  Environment(indentLevel, _, out) =>
+    Environment(indentLevel, skipEmpty, out)
+}
+
+getSkipEmpty :: Environment -> Boolean
+getSkipEmpty = where {
+  Environment(_, skipEmpty, _) => skipEmpty
+}
+
+
+generateIndent :: Number -> String
+generateIndent = (level) => String.repeat(2 * level, " ")
+
+
+
+processChar :: Environment -> String -> Environment
+processChar = (env, currentChar) => where(currentChar) {
+  "{" =>
+    pipe(
+      (c) => `${c}\n${generateIndent(getIndentLevel(env) + 1)}`,
+      append(env),
+      incIndentLevel,
+      setSkipEmpty(true)
+    )(currentChar)
+
+  "," =>
+    pipe(
+      (c) => `${c}\n${generateIndent(getIndentLevel(env))}`,
+      append(env),
+      setSkipEmpty(true)
+    )(currentChar)
+
+  "}" =>
+    pipe(
+      (c) => `\n${generateIndent(getIndentLevel(env) - 1)}${c}`,
+      append(env),
+      decIndentLevel,
+      setSkipEmpty(true)
+    )(currentChar)
+
+  c =>
+    if (getSkipEmpty(env) && List.includes(c, [" ", "\n"])) {
+      env
+    } else {
+      pipe(
+        append(env),
+        setSkipEmpty(false)
+      )(c)
+    }
+}
+
+initialEnv :: Environment
+initialEnv = Environment(0, false, "")
+
+formatRecordTyping :: String -> String
+export formatRecordTyping = pipe(
+  String.reduceChars(processChar, initialEnv),
+  getData,
+  String.lines,
+  map(String.trimEnd),
+  List.unlines
+)

@@ -1,8 +1,9 @@
+import type { FilePath } from "FilePath/Posix"
+
 import List from "List"
 import { Just, Nothing } from "Maybe"
 import { always, any, equals, ifElse } from "Function"
 import { drop, split, toLower, len } from "String"
-import type { FilePath } from "FilePath/Posix"
 import { isRootPathOf, canonicalizePath } from "FilePath/Posix"
 import {} from "Compare"
 

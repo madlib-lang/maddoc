@@ -1,0 +1,28 @@
+import { assertEquals, test } from "TestTools"
+
+import { formatRecordTyping } from "./Format"
+
+
+
+test("formatRecordTyping - simple", (_) => {
+  expected = `{
+  key1 :: Type,
+  key2 :: Type
+}`
+  actual = formatRecordTyping("{ key1 :: Type, key2 :: Type }")
+
+  return assertEquals(actual, expected)
+})
+
+test("formatRecordTyping - sub record", (_) => {
+  expected = `{
+  key1 :: Type,
+  key2 :: Type,
+  key3 :: {
+    key4 :: Type
+  }
+}`
+  actual = formatRecordTyping("{ key1 :: Type, key2 :: Type, key3 :: { key4 :: Type } }")
+
+  return assertEquals(actual, expected)
+})
