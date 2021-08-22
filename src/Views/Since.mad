@@ -1,0 +1,20 @@
+import type { Element } from "MadUI"
+import {
+  className,
+  empty,
+  text,
+  p
+} from "MadUI"
+import { always, ifElse } from "Function"
+import { isEmpty } from "String"
+
+
+Since :: { ...a, since :: String } -> Element
+export Since = pipe(
+  .since,
+  ifElse(
+    isEmpty,
+    always(<empty />),
+    (since) => <p className="definition__since">since v{since}</p>
+  )
+)

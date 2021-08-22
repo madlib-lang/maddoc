@@ -1,0 +1,13 @@
+import type { Element } from "MadUI"
+import {
+  div,
+  className,
+  text
+} from "MadUI"
+
+
+Etiquette :: String -> Element
+export Etiquette = (content) =>
+  <div className="definition__etiquette">
+    {content}
+  </div>

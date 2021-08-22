@@ -1,0 +1,17 @@
+import type { Element } from "MadUI"
+import {
+  className,
+  text,
+  link,
+  to
+} from "MadUI"
+import type { Config } from "MadMarkdownRenderer"
+import { renderMarkdownWithConfig, defaultConfig, setLinkView } from "MadMarkdownRenderer"
+
+mdConfig :: Config
+mdConfig = pipe(
+  setLinkView((txt, url) => <link className="markdown__link" to={url}>{txt}</link>)
+)(defaultConfig)
+
+renderMarkdown :: String -> Element
+export renderMarkdown = renderMarkdownWithConfig(mdConfig)

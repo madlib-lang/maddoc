@@ -1,0 +1,48 @@
+import type { Element } from "MadUI"
+import {
+  div,
+  span,
+  className,
+  text,
+  li
+} from "MadUI"
+
+import { Etiquette } from "@/Views/Etiquette"
+import { Title } from "@/Views/Title"
+import { Since } from "@/Views/Since"
+import { Description } from "@/Views/Description"
+import { Example } from "@/Views/Example"
+
+import type { Instance } from "@/Parser/Documentation"
+
+
+Instance :: String -> Instance -> Element
+export Instance = (moduleName, instanceDef) => {
+  constraints  = instanceDef.constraints
+  constraintElements =
+    if (constraints != "") {[
+        <span>{constraints}</span>,
+        <span className="highlight">{` => `}</span>
+    ]} else { [] }
+
+  p = Title(instanceDef.declaration, moduleName)
+
+  return (
+    <li className="definition">
+      {[
+          Etiquette("Instance"),
+          Title(instanceDef.declaration, moduleName)
+      ]}
+      <div className="definition__interface">
+        <span className="highlight">instance </span>
+        <span>{constraintElements}</span>
+        <span>{instanceDef.declaration}</span>
+      </div>
+      {[
+          Since(instanceDef),
+          Description(instanceDef),
+          Example(instanceDef)
+      ]}
+    </li>
+  )
+}

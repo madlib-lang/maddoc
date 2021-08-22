@@ -1,0 +1,74 @@
+import type { Element } from "MadUI"
+import {
+  key,
+  link,
+  to,
+  className,
+  li,
+  text,
+  span,
+  ul
+} from "MadUI"
+import { append, intercalateWithIndex, reduce } from "List"
+import { snd } from "Tuple"
+import {} from "Number"
+import { canonicalizePath, joinPath, splitPath } from "FilePath/Posix"
+
+import type { State } from "@/State"
+
+
+type Breadcrumb = Breadcrumb(String, String)
+
+getLink = where { Breadcrumb(_, l) => l }
+getName = where { Breadcrumb(l, _) => l }
+
+
+generateBreadcrumbName :: String -> String
+generateBreadcrumbName = pipe(
+  canonicalizePath,
+  (pathSegment) => pathSegment == "/" || pathSegment == ""
+    ? "home"
+    : pathSegment
+)
+
+computeBreadcrumbs :: State -> List Breadcrumb
+computeBreadcrumbs = pipe(
+  .path,
+  splitPath,
+  reduce((acc, pathSegment) =>
+    where(acc) {
+      <prevPath, breadcrumbs> =>
+        pipe(
+          append(pathSegment),
+          joinPath,
+          (path) => <
+            path,
+            append(
+              Breadcrumb(generateBreadcrumbName(pathSegment), path),
+              breadcrumbs
+            )
+          >
+        )([prevPath])
+    },
+    <"", []>
+  ),
+  snd
+)
+
+BreadcrumbItem :: Breadcrumb -> Element
+BreadcrumbItem = (breadcrumb) =>
+  <li className="breadcrumbs__item" key={getLink(breadcrumb)}>
+    <link to={getLink(breadcrumb)}>{getName(breadcrumb)}</link>
+  </li>
+
+Breadcrumbs :: State -> Element
+export Breadcrumbs = pipe(
+  computeBreadcrumbs,
+  map(BreadcrumbItem),
+  intercalateWithIndex((i) =>
+    <span className="breadcrumbs__separator" key={`sep-${show(i)}`}>
+      /
+    </span>
+  ),
+  (breadcrumbs) => <ul className="breadcrumbs">{breadcrumbs}</ul>
+)

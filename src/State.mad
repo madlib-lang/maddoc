@@ -1,0 +1,7 @@
+import type { Module } from "@/Parser/Documentation"
+
+export alias State = {
+  modules :: List Module,
+  search :: String,
+  path :: String
+}

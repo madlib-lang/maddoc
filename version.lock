@@ -1,0 +1,11 @@
+{
+  "buildHash": "089869a0fed9efb61ca8e6954f458623",
+  "versionHash": "25e64aa754c310d45c1e084d574c1bb0",
+  "api": {
+    "apiNames": {},
+    "apiInstances": [],
+    "apiAliases": {},
+    "apiTypes": {},
+    "apiInterfaces": {}
+  }
+}

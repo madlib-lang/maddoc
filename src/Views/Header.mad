@@ -1,0 +1,28 @@
+import type { Action, Element } from "MadUI"
+import {
+  onInput,
+  input,
+  className,
+  text,
+  placeholder,
+  InputEvent,
+  inputType,
+  h1,
+  header
+} from "MadUI"
+import String from "String"
+import { always } from "Function"
+
+import type { State } from "@/State"
+
+handleInput :: Action State
+handleInput = (state, event) => where(event) {
+  InputEvent(e) => [of(always({ ...state, search: String.toLower(e.target.value) }))]
+}
+
+Header :: () -> Element
+export Header = (_) => 
+  <header className="header">
+    <h1 className="header__title">MadDoc</h1>
+    <input inputType="text" placeholder="What are you looking for?" className="search-field" onInput={handleInput} />
+  </header>

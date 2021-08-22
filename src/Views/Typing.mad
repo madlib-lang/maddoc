@@ -1,0 +1,16 @@
+import type { Element } from "MadUI"
+import {
+  className,
+  span,
+  text,
+  p
+} from "MadUI"
+
+Typing :: { typing :: String } -> Element
+export Typing = pipe(
+  .typing,
+  (typing) =>
+    <p>
+      <span className="definition__type">{typing}</span>
+    </p>
+)

@@ -1,0 +1,15 @@
+import type { Element } from "MadUI"
+import {
+  div,
+  className,
+  text
+} from "MadUI"
+import { renderMarkdown } from "@/Markdown"
+
+
+Description :: { ...a, description :: String } -> Element
+export Description = pipe(
+  .description,
+  renderMarkdown,
+  (content) => <div className="definition__description">{content}</div>
+)

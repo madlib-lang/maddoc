@@ -1,9 +1,21 @@
 {
   "name": "MadDoc",
   "version": "0.0.1",
+  "madlibVersion": "0.10.0",
   "main": "src/Main.mad",
-  "bin": "src/CLI/Main.mad",
-  "dependencies": {
-    "MadUI": "https://github.com/madlib-lang/madui/archive/refs/heads/master.zip"
-  }
+  "importAliases": {
+    ".": "src"
+  },
+  "dependencies": [
+    {
+      "url": "https://github.com/madlib-lang/madmarkdown-renderer/archive/refs/tags/v0.0.2.zip",
+      "minVersion": "0.0.2",
+      "description": "MadMarkdownRenderer"
+    },
+    {
+      "url": "https://github.com/madlib-lang/madui/archive/refs/tags/v0.1.0.zip",
+      "minVersion": "0.1.0",
+      "description": "MadUI"
+    }
+  ]
 }

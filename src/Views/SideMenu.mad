@@ -1,0 +1,117 @@
+import List from "List"
+import Tuple from "Tuple"
+import String from "String"
+import { all } from "Function"
+import type { Element } from "MadUI"
+import {
+  div,
+  h3,
+  p,
+  li,
+  link,
+  to,
+  className,
+  text,
+  span,
+  ul
+} from "MadUI"
+import {} from "Compare"
+
+import type { Module } from "@/Parser/Documentation"
+
+ModuleLink :: Module -> Element
+ModuleLink = (module) =>
+  <li className="side-menu__link-item">
+    <link className="side-menu__link" to={`/${module.name}`}>
+      <span className="side-menu__link-name">{module.name}</span>
+    </link>
+  </li>
+
+MenuLink :: <String, String> -> Element
+MenuLink = where { <name, moduleName> =>
+  <li className="side-menu__link-item">
+    <link className="side-menu__link" to={`/${moduleName}/${name}`}>
+      <span className="side-menu__link-name">{name}</span>
+      <span className="side-menu__link-extra">{moduleName}</span>
+    </link>
+  </li>
+}
+
+LinksForType :: String
+  -> ({ ...a, name :: String } -> List b)
+  -> (b -> String)
+  -> List { ...a, name :: String }
+  -> List Element
+LinksForType = (search, getItems, getName) => pipe(
+  chain((module) => pipe(
+    getItems,
+    List.filter(pipe(getName, String.toLower, String.match(search))),
+    map((a) => <getName(a), module.name>)
+  )(module)),
+  itemsToLinks
+)
+
+itemsToLinks :: List <String, String> -> List Element
+itemsToLinks = pipe(
+  List.sortBy((a, b) => compare(Tuple.fst(a), Tuple.fst(b))),
+  map(MenuLink)
+)
+
+sortAndFilterModules :: String -> List Module -> List Module
+sortAndFilterModules = (search) => pipe(
+  List.filter(pipe(.name, String.toLower, String.match(search))),
+  List.sortBy((a, b) => compare(a.name, b.name))
+)
+
+MenuSection :: String -> List Element -> List Element
+MenuSection = (title, items) => List.isEmpty(items)
+  ? []
+  : [
+      <h3 className="side-menu__title">{title}</h3>,
+      <ul className="side-menu__link-list">
+        {items}
+      </ul>
+    ]
+
+SideMenu :: String -> List Module -> Element
+export SideMenu = (search, modules) => {
+  moduleLinks = map(ModuleLink, sortAndFilterModules(search, modules))
+  functionLinks = LinksForType(search, .expressions, .name, modules)
+  typeLinks = LinksForType(search, .typeDeclarations, .name, modules)
+  aliasLinks = LinksForType(search, .aliases, .name, modules)
+  interfaceLinks = LinksForType(search, .interfaces, .name, modules)
+  instanceLinks = LinksForType(search, .instances, .declaration, modules)
+
+  notFound = all(
+    List.isEmpty,
+    [
+      moduleLinks,
+      functionLinks,
+      typeLinks,
+      aliasLinks,
+      interfaceLinks,
+      instanceLinks
+    ]
+  )
+
+  return notFound
+    ? (
+        <div className="side-menu">
+          <p className="side-menu__no-result">
+            No result was found for <span className="side-menu__no-result-search">{search}</span>
+          </p>
+        </div>
+      )
+    : (
+        <div className="side-menu">
+          <div className="side-menu__scrollbar-container">
+            {MenuSection("MODULES", moduleLinks)}
+            {MenuSection("FUNCTIONS", functionLinks)}
+            {MenuSection("TYPES", typeLinks)}
+            {MenuSection("ALIASES", aliasLinks)}
+            {MenuSection("INTERFACES", interfaceLinks)}
+            {MenuSection("INSTANCES", instanceLinks)}
+          </div>
+        </div>
+      )
+}
