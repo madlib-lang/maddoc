@@ -6,7 +6,6 @@ import {
   className,
   li,
   text,
-  span,
   ul
 } from "MadUI"
 import { append, intercalateWithIndex, reduce } from "List"
@@ -66,9 +65,9 @@ export Breadcrumbs = pipe(
   computeBreadcrumbs,
   map(BreadcrumbItem),
   intercalateWithIndex((i) =>
-    <span className="breadcrumbs__separator" key={`sep-${show(i)}`}>
+    <li className="breadcrumbs__separator" key={`sep-${show(i)}`}>
       /
-    </span>
+    </li>
   ),
-  (breadcrumbs) => <ul className="breadcrumbs">{breadcrumbs}</ul>
+  (breadcrumbs) => <ul className="breadcrumbs">{...breadcrumbs}</ul>
 )

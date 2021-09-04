@@ -29,16 +29,16 @@ export Instance = (moduleName, instanceDef) => {
 
   return (
     <li className="definition">
-      {[
+      {...[
           Etiquette("Instance"),
           Title(instanceDef.declaration, moduleName)
       ]}
       <div className="definition__interface">
         <span className="highlight">instance </span>
-        <span>{constraintElements}</span>
+        <span>{...constraintElements}</span>
         <span>{instanceDef.declaration}</span>
       </div>
-      {[
+      {...[
           Since(instanceDef),
           Description(instanceDef),
           Example(instanceDef)

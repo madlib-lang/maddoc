@@ -1,6 +1,6 @@
 {
   "name": "MadDoc",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "madlibVersion": "0.10.0",
   "main": "src/Main.mad",
   "importAliases": {
@@ -8,13 +8,13 @@
   },
   "dependencies": [
     {
-      "minVersion": "0.0.3",
-      "url": "https://github.com/madlib-lang/madmarkdown-renderer/archive/refs/tags/v0.0.3.zip",
+      "minVersion": "0.0.4",
+      "url": "https://github.com/madlib-lang/madmarkdown-renderer/archive/refs/tags/v0.0.4.zip",
       "description": "MadMarkdownRenderer"
     },
     {
-      "minVersion": "1.0.0",
-      "url": "https://github.com/madlib-lang/madui/archive/refs/tags/v1.0.0.zip",
+      "minVersion": "2.0.0",
+      "url": "https://github.com/madlib-lang/madui/archive/refs/tags/v2.0.0.zip",
       "description": "MadUI"
     }
   ]

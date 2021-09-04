@@ -34,16 +34,16 @@ export Type = (moduleName, typeDefinition) => {
 
   return (
     <li className="definition">
-      {[
+      {...[
           Etiquette("Type"),
           Title(typeDefinition.name, moduleName)
       ]}
       <div className="definition__adt">
         <span className="highlight">type</span>
         <span> {typeDefinition.name} {typeDefinition.params}</span>
-        <span className="definition__constructors">{renderedConstructors}</span>
+        <span className="definition__constructors">{...renderedConstructors}</span>
       </div>
-      {[
+      {...[
           Since(typeDefinition),
           Description(typeDefinition),
           Example(typeDefinition)

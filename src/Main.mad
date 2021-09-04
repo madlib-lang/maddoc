@@ -76,11 +76,11 @@ ModuleView = (module) =>
         : <p className="module__description">{renderMarkdown(module.description)}</p>
     }
     <ul className="content__items">
-      {map(Type(module.name), module.typeDeclarations)}
-      {map(Alias(module.name), module.aliases)}
-      {map(Interface(module.name), module.interfaces)}
-      {map(Instance(module.name), module.instances)}
-      {map(Expression(module.name), module.expressions)}
+      {...map(Type(module.name), module.typeDeclarations)}
+      {...map(Alias(module.name), module.aliases)}
+      {...map(Interface(module.name), module.interfaces)}
+      {...map(Instance(module.name), module.instances)}
+      {...map(Expression(module.name), module.expressions)}
     </ul>
   </div>
 
@@ -88,7 +88,7 @@ ModuleView = (module) =>
 ContentView :: PathResult -> Element
 ContentView = where {
   ModuleResult(modules) =>
-    <div>{map(ModuleView, modules)}</div>
+    <div>{...map(ModuleView, modules)}</div>
 
   ExpressionResult(moduleName, exp) =>
     <ul className="content__items">{Expression(moduleName, exp)}</ul>

@@ -3,7 +3,6 @@ import {
   onInput,
   input,
   className,
-  text,
   placeholder,
   InputEvent,
   inputType,

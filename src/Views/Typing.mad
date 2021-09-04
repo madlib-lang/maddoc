@@ -6,7 +6,7 @@ import {
   p
 } from "MadUI"
 
-Typing :: { typing :: String } -> Element
+Typing :: { ...a, typing :: String } -> Element
 export Typing = pipe(
   .typing,
   (typing) =>

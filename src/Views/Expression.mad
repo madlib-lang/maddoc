@@ -17,7 +17,7 @@ import type { Expression } from "@/Parser/Documentation"
 Expression :: String -> Expression -> Element
 export Expression = (moduleName, definition) =>
   <li className="definition">
-    {[
+    {...[
         Etiquette("Function"),
         Title(definition.name, moduleName),
         Typing(definition),
