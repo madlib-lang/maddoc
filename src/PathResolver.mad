@@ -3,7 +3,7 @@ import type { FilePath } from "FilePath/Posix"
 import List from "List"
 import { Just, Nothing } from "Maybe"
 import { always, any, equals, ifElse } from "Function"
-import { drop, split, toLower, len } from "String"
+import { drop, split, toLower, length } from "String"
 import { isRootPathOf, canonicalizePath } from "FilePath/Posix"
 import {} from "Compare"
 
@@ -29,6 +29,10 @@ export type PathResult
   | NotFound
 
 
+concatMany :: List (List a) -> List a
+concatMany = (lists) => List.reduce(List.concat, [], lists)
+
+
 filterByPath :: String -> List Module -> List Module
 filterByPath = (path) => {
   canPath = canonicalizePath(path)
@@ -47,14 +51,14 @@ filterByPath = (path) => {
           || !List.isEmpty(module.instances)
         ),
         pipe(
-          always([
-            ...map(.name, module.expressions),
-            ...map(.name, module.typeDeclarations),
-            ...map(.name, module.aliases),
-            ...map(.name, module.interfaces),
-            ...map(.declaration, module.instances)
-          ]),
-          map(pipe(mappend(`${module.name}/`), toLower)),
+          always(concatMany([
+            map(.name, module.expressions),
+            map(.name, module.typeDeclarations),
+            map(.name, module.aliases),
+            map(.name, module.interfaces),
+            map(.declaration, module.instances)
+          ])),
+          map(pipe(mconcat(`${module.name}/`), toLower)),
           any(isRootPathOf(drop(1, toLower(canPath))))
         )
       )
@@ -71,11 +75,11 @@ export getModulesToShow = (state) => pipe(
 
 isItemView :: String -> List Module -> Boolean
 isItemView = (path) => ifElse(
-  pipe(List.len, equals(1)),
+  pipe(List.length, equals(1)),
   pipe(
     List.first,
     where {
-      Just(m) => len(canonicalizePath(path)) > len(`/${m.name}`)
+      Just(m) => length(canonicalizePath(path)) > length(`/${m.name}`)
       Nothing => false
     }
   ),

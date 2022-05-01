@@ -1,4 +1,6 @@
 import type { Element } from "MadUI"
+import type { State } from "@/State"
+
 import {
   className,
   text,
@@ -8,10 +10,10 @@ import {
 import type { Config } from "MadMarkdownRenderer"
 import { renderMarkdownWithConfig, defaultConfig, setLinkView } from "MadMarkdownRenderer"
 
-mdConfig :: Config
+mdConfig :: Config State
 mdConfig = pipe(
   setLinkView((txt, url) => <link className="markdown__link" to={url}>{txt}</link>)
 )(defaultConfig)
 
-renderMarkdown :: String -> Element
+renderMarkdown :: String -> Element State
 export renderMarkdown = renderMarkdownWithConfig(mdConfig)

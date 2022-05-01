@@ -7,6 +7,8 @@ import {
   li
 } from "MadUI"
 
+import type { State } from "@/State"
+
 import { Etiquette } from "@/Views/Etiquette"
 import { Title } from "@/Views/Title"
 import { Since } from "@/Views/Since"
@@ -16,7 +18,7 @@ import { Example } from "@/Views/Example"
 import type { Instance } from "@/Parser/Documentation"
 
 
-Instance :: String -> Instance -> Element
+Instance :: String -> Instance -> Element State
 export Instance = (moduleName, instanceDef) => {
   constraints  = instanceDef.constraints
   constraintElements =

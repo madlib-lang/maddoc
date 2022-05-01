@@ -36,31 +36,32 @@ computeBreadcrumbs = pipe(
   splitPath,
   reduce((acc, pathSegment) =>
     where(acc) {
-      <prevPath, breadcrumbs> =>
+      #[prevPath, breadcrumbs] =>
         pipe(
           append(pathSegment),
           joinPath,
-          (path) => <
-            path,
-            append(
-              Breadcrumb(generateBreadcrumbName(pathSegment), path),
-              breadcrumbs
-            )
-          >
+          (path) =>
+            #[
+              path,
+              append(
+                Breadcrumb(generateBreadcrumbName(pathSegment), path),
+                breadcrumbs
+              )
+            ]
         )([prevPath])
     },
-    <"", []>
+    #["", []]
   ),
   snd
 )
 
-BreadcrumbItem :: Breadcrumb -> Element
+BreadcrumbItem :: Breadcrumb -> Element a
 BreadcrumbItem = (breadcrumb) =>
   <li className="breadcrumbs__item" key={getLink(breadcrumb)}>
     <link to={getLink(breadcrumb)}>{getName(breadcrumb)}</link>
   </li>
 
-Breadcrumbs :: State -> Element
+Breadcrumbs :: State -> Element a
 export Breadcrumbs = pipe(
   computeBreadcrumbs,
   map(BreadcrumbItem),

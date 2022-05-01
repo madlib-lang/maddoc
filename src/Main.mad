@@ -1,10 +1,10 @@
-import Json from "Json"
+import Json from "JsonParser"
 import String from "String"
-import { Right } from "Either"
+import { Right, Left } from "Either"
 import docJson from "@/documentation.json"
-import type { Element } from "MadUI"
+import type { Element, GlobalAction } from "MadUI"
 import {
-  UrlEvent,
+  PopStateEvent,
   div,
   h2,
   className,
@@ -16,11 +16,14 @@ import {
   p,
   link,
   to,
-  render,
+  renderWithConfig,
+  DEFAULT_CONFIG,
+  addGlobalEventHandler,
   main,
   ul
 } from "MadUI"
-import URL from "URL"
+import Url from "Url"
+import Maybe from "Maybe"
 
 import type { State } from "@/State"
 
@@ -50,6 +53,8 @@ import {
 
 import { renderMarkdown } from "@/Markdown"
 
+import IO from "IO"
+
 
 parsedDocumentation = Json.parse(parser, docJson)
 
@@ -59,12 +64,21 @@ initialState = where(parsedDocumentation) {
     {
       modules,
       search: "",
-      path: URL.decode(getUrl(()))
+      path: Maybe.fromMaybe("", Url.decode(getUrl({})))
     }
+
+  Left(err) => do {
+    IO.log(err)
+    return {
+      modules: [],
+      search: "",
+      path: ""
+    }
+  }
 }
 
 
-ModuleView :: Module -> Element
+ModuleView :: Module -> Element State
 ModuleView = (module) =>
   <div className="module">
     <h2 className="module__title">
@@ -84,8 +98,7 @@ ModuleView = (module) =>
     </ul>
   </div>
 
-
-ContentView :: PathResult -> Element
+ContentView :: PathResult -> Element State
 ContentView = where {
   ModuleResult(modules) =>
     <div>{...map(ModuleView, modules)}</div>
@@ -107,13 +120,13 @@ ContentView = where {
 }
 
 
-DocApp :: State -> Element
+DocApp :: State -> Element State
 DocApp = (state) => {
   modulesInPath = getModulesToShow(state)
   pathResult = processPath(state)
   return (
     <div className="documentation">
-      {Header(())}
+      {Header({})}
       {SideMenu(state.search, state.modules)}
       <main className="documentation__content">
         {Breadcrumbs(state)}
@@ -123,8 +136,16 @@ DocApp = (state) => {
   )
 }
 
-onUrlChanged(syncAction((state, event) => where(event) {
-  UrlEvent({ url }) => { ...state, path: URL.decode(url) }
+
+handleUrlChanged :: GlobalAction State
+handleUrlChanged = onUrlChanged(syncAction((state, event) => where(event) {
+  PopStateEvent({ url }) => { ...state, path: Maybe.fromMaybe("", Url.decode(url)) }
 }))
 
-render(DocApp, initialState, "app")
+
+renderWithConfig(
+  addGlobalEventHandler(handleUrlChanged, DEFAULT_CONFIG),
+  DocApp,
+  initialState,
+  "app"
+)

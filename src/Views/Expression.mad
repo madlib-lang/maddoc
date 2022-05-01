@@ -1,4 +1,6 @@
 import type { Element } from "MadUI"
+import type { State } from "@/State"
+
 import {
   className,
   text,
@@ -14,7 +16,7 @@ import { Typing } from "@/Views/Typing"
 
 import type { Expression } from "@/Parser/Documentation"
 
-Expression :: String -> Expression -> Element
+Expression :: String -> Expression -> Element State
 export Expression = (moduleName, definition) =>
   <li className="definition">
     {...[

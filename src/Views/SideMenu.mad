@@ -1,8 +1,11 @@
+import type { Element } from "MadUI"
+import type { State } from "@/State"
+import type { Module } from "@/Parser/Documentation"
+
 import List from "List"
 import Tuple from "Tuple"
 import String from "String"
 import { all } from "Function"
-import type { Element } from "MadUI"
 import {
   div,
   h3,
@@ -17,10 +20,9 @@ import {
 } from "MadUI"
 import {} from "Compare"
 
-import type { Module } from "@/Parser/Documentation"
 
 
-ModuleLink :: Module -> Element
+ModuleLink :: Module -> Element State
 ModuleLink = (module) =>
   <li className="side-menu__link-item">
     <link className="side-menu__link" to={`/${module.name}`}>
@@ -29,14 +31,15 @@ ModuleLink = (module) =>
   </li>
 
 
-MenuLink :: <String, String> -> Element
-MenuLink = where { <name, moduleName> =>
-  <li className="side-menu__link-item">
-    <link className="side-menu__link" to={`/${moduleName}/${name}`}>
-      <span className="side-menu__link-name">{name}</span>
-      <span className="side-menu__link-extra">{moduleName}</span>
-    </link>
-  </li>
+MenuLink :: #[String, String] -> Element State
+MenuLink = where {
+  #[name, moduleName] =>
+    <li className="side-menu__link-item">
+      <link className="side-menu__link" to={`/${moduleName}/${name}`}>
+        <span className="side-menu__link-name">{name}</span>
+        <span className="side-menu__link-extra">{moduleName}</span>
+      </link>
+    </li>
 }
 
 
@@ -44,18 +47,18 @@ LinksForType :: String
   -> ({ ...a, name :: String } -> List b)
   -> (b -> String)
   -> List { ...a, name :: String }
-  -> List Element
+  -> List (Element State)
 LinksForType = (search, getItems, getName) => pipe(
   chain((module) => pipe(
     getItems,
     List.filter(pipe(getName, String.toLower, String.match(search))),
-    map((a) => <getName(a), module.name>)
+    map((a) => #[getName(a), module.name])
   )(module)),
   itemsToLinks
 )
 
 
-itemsToLinks :: List <String, String> -> List Element
+itemsToLinks :: List #[String, String] -> List (Element State)
 itemsToLinks = pipe(
   List.sortBy((a, b) => compare(Tuple.fst(a), Tuple.fst(b))),
   map(MenuLink)
@@ -69,7 +72,7 @@ sortAndFilterModules = (search) => pipe(
 )
 
 
-MenuSection :: String -> List Element -> List Element
+MenuSection :: String -> List (Element State) -> List (Element State)
 MenuSection = (title, items) => List.isEmpty(items)
   ? []
   : [
@@ -79,8 +82,7 @@ MenuSection = (title, items) => List.isEmpty(items)
       </ul>
     ]
 
-
-SideMenu :: String -> List Module -> Element
+SideMenu :: String -> List Module -> (Element State)
 export SideMenu = (search, modules) => {
   moduleLinks = map(ModuleLink, sortAndFilterModules(search, modules))
   functionLinks = LinksForType(search, .expressions, .name, modules)
@@ -105,7 +107,7 @@ export SideMenu = (search, modules) => {
     ? (
         <div className="side-menu">
           <p className="side-menu__no-result">
-            {text("No result was found for ")}<span className="side-menu__no-result-search">{search}</span>
+            No result was found for <span className="side-menu__no-result-search">{search}</span>
           </p>
         </div>
       )

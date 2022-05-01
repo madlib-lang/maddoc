@@ -1,4 +1,6 @@
 import type { Element } from "MadUI"
+import type { State } from "@/State"
+
 import {
   className,
   empty,
@@ -8,7 +10,7 @@ import {
 import { always, ifElse } from "Function"
 import { isEmpty } from "String"
 
-Example :: { ...a, example :: String } -> Element
+Example :: { ...a, example :: String } -> Element State
 export Example = pipe(
   .example,
   ifElse(

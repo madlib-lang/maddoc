@@ -1,4 +1,6 @@
 import type { Element } from "MadUI"
+import type { State } from "@/State"
+
 import {
   div,
   span,
@@ -17,7 +19,7 @@ import { Example } from "@/Views/Example"
 import type { Alias } from "@/Parser/Documentation"
 
 
-Alias :: String -> Alias -> Element
+Alias :: String -> Alias -> Element State
 export Alias = (moduleName, aliasDef) => {
   aliasedType = aliasDef.aliasedType
   params = String.isEmpty(aliasDef.params)

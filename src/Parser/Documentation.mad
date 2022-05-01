@@ -1,4 +1,4 @@
-import Json from "Json"
+import Json from "JsonParser"
 
 export alias Instance = {
   declaration :: String,
@@ -108,55 +108,55 @@ export parser = Json.field("modules", Json.list(
     Json.field("expressions", Json.list(
       Json.map5(
         makeExpression,
-        Json.field("name", Json.string),
-        Json.field("description", Json.string),
-        Json.field("type", Json.string),
-        Json.field("since", Json.string),
-        Json.field("example", Json.string)
+        Json.path(["js", "name"], Json.string),
+        Json.path(["js", "description"], Json.string),
+        Json.path(["js", "type"], Json.string),
+        Json.path(["js", "since"], Json.string),
+        Json.path(["js", "example"], Json.string)
       )
     )),
     Json.field("typeDeclarations", Json.list(
       Json.map6(
         makeType,
-        Json.field("name", Json.string),
-        Json.field("params", Json.string),
-        Json.field("constructors", Json.list(Json.string)),
-        Json.field("description", Json.string),
-        Json.field("since", Json.string),
-        Json.field("example", Json.string)
+        Json.path(["js", "name"], Json.string),
+        Json.path(["js", "params"], Json.string),
+        Json.path(["js", "constructors"], Json.list(Json.string)),
+        Json.path(["js", "description"], Json.string),
+        Json.path(["js", "since"], Json.string),
+        Json.path(["js", "example"], Json.string)
       )
     )),
     Json.field("aliases", Json.list(
       Json.map6(
         makeAlias,
-        Json.field("name", Json.string),
-        Json.field("params", Json.string),
-        Json.field("aliasedType", Json.string),
-        Json.field("description", Json.string),
-        Json.field("since", Json.string),
-        Json.field("example", Json.string)
+        Json.path(["js", "name"], Json.string),
+        Json.path(["js", "params"], Json.string),
+        Json.path(["js", "aliasedType"], Json.string),
+        Json.path(["js", "description"], Json.string),
+        Json.path(["js", "since"], Json.string),
+        Json.path(["js", "example"], Json.string)
       )
     )),
     Json.field("interfaces", Json.list(
       Json.map7(
         makeInterface,
-        Json.field("name", Json.string),
-        Json.field("vars", Json.string),
-        Json.field("constraints", Json.string),
-        Json.field("methods", Json.list(Json.string)),
-        Json.field("description", Json.string),
-        Json.field("since", Json.string),
-        Json.field("example", Json.string)
+        Json.path(["js", "name"], Json.string),
+        Json.path(["js", "vars"], Json.string),
+        Json.path(["js", "constraints"], Json.string),
+        Json.path(["js", "methods"], Json.list(Json.string)),
+        Json.path(["js", "description"], Json.string),
+        Json.path(["js", "since"], Json.string),
+        Json.path(["js", "example"], Json.string)
       )
     )),
     Json.field("instances", Json.list(
       Json.map5(
         makeInstance,
-        Json.field("declaration", Json.string),
-        Json.field("constraints", Json.string),
-        Json.field("description", Json.string),
-        Json.field("since", Json.string),
-        Json.field("example", Json.string)
+        Json.path(["js", "declaration"], Json.string),
+        Json.path(["js", "constraints"], Json.string),
+        Json.path(["js", "description"], Json.string),
+        Json.path(["js", "since"], Json.string),
+        Json.path(["js", "example"], Json.string)
       )
     ))
   )

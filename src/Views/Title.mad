@@ -1,4 +1,6 @@
 import type { Element } from "MadUI"
+import type { State } from "@/State"
+
 import {
   h2,
   span,
@@ -7,7 +9,8 @@ import {
 } from "MadUI"
 
 
-Title :: String -> String -> Element
+
+Title :: String -> String -> Element State
 export Title = (title, moduleName) =>
   <h2 className="definition__title">
     <span>{title}</span>

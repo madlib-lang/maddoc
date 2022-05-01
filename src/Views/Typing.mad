@@ -1,4 +1,6 @@
 import type { Element } from "MadUI"
+import type { State } from "@/State"
+
 import {
   className,
   span,
@@ -6,7 +8,7 @@ import {
   p
 } from "MadUI"
 
-Typing :: { ...a, typing :: String } -> Element
+Typing :: { ...a, typing :: String } -> Element State
 export Typing = pipe(
   .typing,
   (typing) =>

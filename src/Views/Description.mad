@@ -1,4 +1,6 @@
 import type { Element } from "MadUI"
+import type { State } from "@/State"
+
 import {
   div,
   className,
@@ -7,7 +9,7 @@ import {
 import { renderMarkdown } from "@/Markdown"
 
 
-Description :: { ...a, description :: String } -> Element
+Description :: { ...a, description :: String } -> Element State
 export Description = pipe(
   .description,
   renderMarkdown,
