@@ -17,9 +17,10 @@
   "scripts": {
     "info": "madlib --version",
     "build:bundle": "madlib compile -i src/Main.mad --target browser --bundle -o build/bundle.js",
+    "build:bundle:watch": "madlib compile -i src/Main.mad --target browser --bundle -o build/bundle.js --watch",
     "build:sass": "sass src/styles/main.scss build/styles/main.css",
     "build:html": "copy-and-watch src/**/*.html build/",
-    "dev": "concurrently \"browser-sync start --server build --files build/**\" \"sass --watch src/styles/main.scss build/styles/main.css\" \"copy-and-watch --watch src/**/*.html build/\" \"copy-and-watch --watch src/assets/* build/assets/\" \"watch 'npm run build:bundle' src\"",
+    "dev": "concurrently \"browser-sync start --server build --files build/**\" \"sass --watch src/styles/main.scss build/styles/main.css\" \"copy-and-watch --watch src/**/*.html build/\" \"copy-and-watch --watch src/assets/* build/assets/\" \"npm run build:bundle:watch\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

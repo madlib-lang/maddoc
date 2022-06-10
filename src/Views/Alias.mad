@@ -30,7 +30,11 @@ export Alias = (moduleName, aliasDef) => {
     <li className="definition">
       {...[
           Etiquette("Alias"),
-          Title(aliasDef.name, moduleName)
+          Title(
+            aliasDef.name,
+            { hasJS: false, hasLLVM: false, isAvailable: false },
+            moduleName
+          )
       ]}
       <div className="definition__adt">
         <span className="highlight">alias</span>

@@ -1,7 +1,12 @@
 import type { Module } from "@/Parser/Documentation"
 
+export type Target
+  = LLVM
+  | JS
+
 export alias State = {
   modules :: List Module,
   search :: String,
-  path :: String
+  path :: String,
+  target :: Target
 }

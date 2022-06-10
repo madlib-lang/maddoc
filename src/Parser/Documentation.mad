@@ -1,4 +1,7 @@
+import type { Maybe } from "Maybe"
+
 import Json from "JsonParser"
+import { Just, Nothing } from "Maybe"
 
 export alias Instance = {
   declaration :: String,
@@ -44,11 +47,51 @@ export alias Expression = {
   example     :: String
 }
 
+export type Targeted a
+  = BothTargets(a, a)
+  | JSTarget(a)
+  | LLVMTarget(a)
+
+
+getName :: Targeted { ...base, name :: String } -> String
+export getName = (targeted) => where(targeted) {
+  BothTargets(a, _) =>
+    a.name
+
+  JSTarget(a) =>
+    a.name
+
+  LLVMTarget(a) =>
+    a.name
+}
+
+
+hasJSTarget :: Targeted a -> Boolean
+export hasJSTarget = (targeted) => where(targeted) {
+  BothTargets(_, _) =>
+    true
+
+  JSTarget(_) =>
+    true
+
+  _ =>
+    false
+}
+
+forJS :: Targeted a -> a
+export forJS = (targeted) => where(targeted) {
+  BothTargets(a, _) =>
+    a
+
+  JSTarget(a) =>
+    a
+}
+
 export alias Module = {
   path             :: String,
   name             :: String,
   description      :: String,
-  expressions      :: List Expression,
+  expressions      :: List (Targeted Expression),
   typeDeclarations :: List Type,
   aliases          :: List Alias,
   interfaces       :: List Interface,
@@ -78,10 +121,22 @@ makeExpression = (name, description, typing, since, example) => ({
   name, description, typing, since, example
 })
 
+makeTargeted :: Maybe a -> Maybe a -> Targeted a
+makeTargeted = (maybeJS, maybeLLVM) => where(#[maybeJS, maybeLLVM]) {
+  #[Just(js), Just(llvm)] =>
+    BothTargets(js, llvm)
+
+  #[Just(js), Nothing] =>
+    JSTarget(js)
+
+  #[Nothing, Just(llvm)] =>
+    LLVMTarget(llvm)
+}
+
 makeModule :: String
   -> String
   -> String
-  -> List Expression
+  -> List (Targeted Expression)
   -> List Type
   -> List Alias
   -> List Interface
@@ -98,6 +153,19 @@ makeModule = (path, name, description, expressions, typeDeclarations, aliases, i
   instances
 })
 
+
+
+expressionParser :: Json.Parser Expression
+expressionParser = Json.map5(
+  makeExpression,
+  Json.field("name", Json.string),
+  Json.field("description", Json.string),
+  Json.field("type", Json.string),
+  Json.field("since", Json.string),
+  Json.field("example", Json.string)
+)
+
+
 parser :: Json.Parser Documentation
 export parser = Json.field("modules", Json.list(
   Json.map8(
@@ -106,13 +174,10 @@ export parser = Json.field("modules", Json.list(
     Json.field("moduleName", Json.string),
     Json.field("description", Json.string),
     Json.field("expressions", Json.list(
-      Json.map5(
-        makeExpression,
-        Json.path(["js", "name"], Json.string),
-        Json.path(["js", "description"], Json.string),
-        Json.path(["js", "type"], Json.string),
-        Json.path(["js", "since"], Json.string),
-        Json.path(["js", "example"], Json.string)
+      Json.map2(
+        makeTargeted,
+        Json.maybe(Json.field("js", expressionParser)),
+        Json.maybe(Json.field("llvm", expressionParser))
       )
     )),
     Json.field("typeDeclarations", Json.list(

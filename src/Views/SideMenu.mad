@@ -19,6 +19,7 @@ import {
   ul
 } from "MadUI"
 import {} from "Compare"
+import { getName } from "@/Parser/Documentation"
 
 
 
@@ -48,11 +49,11 @@ LinksForType :: String
   -> (b -> String)
   -> List { ...a, name :: String }
   -> List (Element State)
-LinksForType = (search, getItems, getName) => pipe(
+LinksForType = (search, getItems, retrieveName) => pipe(
   chain((module) => pipe(
     getItems,
-    List.filter(pipe(getName, String.toLower, String.match(search))),
-    map((a) => #[getName(a), module.name])
+    List.filter(pipe(retrieveName, String.toLower, String.match(search))),
+    map((a) => #[retrieveName(a), module.name])
   )(module)),
   itemsToLinks
 )
@@ -85,7 +86,7 @@ MenuSection = (title, items) => List.isEmpty(items)
 SideMenu :: String -> List Module -> (Element State)
 export SideMenu = (search, modules) => {
   moduleLinks = map(ModuleLink, sortAndFilterModules(search, modules))
-  functionLinks = LinksForType(search, .expressions, .name, modules)
+  functionLinks = LinksForType(search, .expressions, getName, modules)
   typeLinks = LinksForType(search, .typeDeclarations, .name, modules)
   aliasLinks = LinksForType(search, .aliases, .name, modules)
   interfaceLinks = LinksForType(search, .interfaces, .name, modules)

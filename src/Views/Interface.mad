@@ -32,7 +32,11 @@ export Interface = (moduleName, interfaceDef) => {
     <li className="definition">
       {...[
           Etiquette("Interface"),
-          Title(interfaceDef.name, moduleName)
+          Title(
+            interfaceDef.name,
+            { hasJS: false, hasLLVM: false, isAvailable: false },
+            moduleName
+          )
       ]}
       <div className="definition__interface">
         <span className="highlight">interface </span>

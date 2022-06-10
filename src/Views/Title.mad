@@ -1,18 +1,34 @@
 import type { Element } from "MadUI"
 import type { State } from "@/State"
+import type { TargetInfo } from "@/TargetInfo"
 
 import {
+  className,
+  empty,
   h2,
   span,
-  className,
   text
 } from "MadUI"
 
 
 
-Title :: String -> String -> Element State
-export Title = (title, moduleName) =>
+makeTagClassName :: Boolean -> String
+makeTagClassName = (isWarning) => isWarning
+  ? "definition__target-tag definition__target-tag--warning"
+  : "definition__target-tag"
+
+
+TargetTags :: TargetInfo -> List (Element State)
+TargetTags = (targetInfo) => ([
+  targetInfo.hasJS ? <span className={makeTagClassName(!targetInfo.isAvailable)}>JS</span> : <empty />,
+  targetInfo.hasLLVM ? <span className={makeTagClassName(!targetInfo.isAvailable)}>LLVM</span> : <empty />,
+])
+
+
+Title :: String -> TargetInfo -> String -> Element State
+export Title = (title, targetInfo, moduleName) =>
   <h2 className="definition__title">
-    <span>{title}</span>
+    <span className="definition__title-span">{title}</span>
+    {...TargetTags(targetInfo)}
     <span className="definition__module">{moduleName}</span>
   </h2>

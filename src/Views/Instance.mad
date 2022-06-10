@@ -27,13 +27,15 @@ export Instance = (moduleName, instanceDef) => {
         <span className="highlight">{` => `}</span>
     ]} else { [] }
 
-  p = Title(instanceDef.declaration, moduleName)
-
   return (
     <li className="definition">
       {...[
           Etiquette("Instance"),
-          Title(instanceDef.declaration, moduleName)
+          Title(
+            instanceDef.declaration,
+            { hasJS: false, hasLLVM: false, isAvailable: false },
+            moduleName
+          )
       ]}
       <div className="definition__interface">
         <span className="highlight">instance </span>

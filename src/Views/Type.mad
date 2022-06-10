@@ -38,7 +38,11 @@ export Type = (moduleName, typeDefinition) => {
     <li className="definition">
       {...[
           Etiquette("Type"),
-          Title(typeDefinition.name, moduleName)
+          Title(
+            typeDefinition.name,
+            { hasJS: false, hasLLVM: false, isAvailable: false },
+            moduleName
+          )
       ]}
       <div className="definition__adt">
         <span className="highlight">type</span>

@@ -1,15 +1,20 @@
 import type { Action, Element } from "MadUI"
-import type { State } from "@/State"
+import type { State, Target } from "@/State"
 
+import { JS, LLVM } from "@/State"
 import {
+  button,
+  className,
+  div,
+  onClick,
   onInput,
   input,
-  className,
   placeholder,
   InputEvent,
   inputType,
   h1,
-  header
+  header,
+  syncAction
 } from "MadUI"
 import String from "String"
 import { always } from "Function"
@@ -20,9 +25,34 @@ handleInput = (state, event) => where(event) {
   InputEvent(e) => [of(always({ ...state, search: String.toLower(e.target.value) }))]
 }
 
-Header :: {} -> Element State
-export Header = (_) => 
+
+handleTargetChange :: Target -> Action State
+handleTargetChange = (target) =>
+  syncAction(
+    (state, _) => ({
+      ...state,
+      target
+    })
+  )
+
+
+Header :: Target -> Element State
+export Header = (target) => 
   <header className="header">
     <h1 className="header__title">MadDoc</h1>
     <input inputType="text" placeholder="What are you looking for?" className="search-field" onInput={handleInput} />
+    <div className="target-selector">
+      <button
+        className={`target-selector__button${target == JS ? " target-selector__button--selected" : ""}`}
+        onClick={handleTargetChange(JS)}
+      >
+        Javascript
+      </button>
+      <button
+        className={`target-selector__button${target == LLVM ? " target-selector__button--selected" : ""}`}
+        onClick={handleTargetChange(LLVM)}
+      >
+        LLVM
+      </button>
+    </div>
   </header>
