@@ -1,0 +1,27 @@
+import type { Element } from "MadUI"
+import type { TargetInfo } from "@/TargetInfo"
+import type { Targeted } from "@/Parser/Documentation"
+import type { State, Target } from "@/State"
+
+import { JSTarget, BothTargets, LLVMTarget } from "@/Parser/Documentation"
+import { LLVM, JS } from "@/State"
+
+
+
+TargetedItem :: Target -> Targeted a -> (TargetInfo -> a -> Element State) -> Element State
+export TargetedItem = (target, targeted, cardView) => where(targeted) {
+  JSTarget(js) =>
+    target == JS
+      ? cardView({ hasJS: true, hasLLVM: false, isAvailable: true }, js)
+      : cardView({ hasJS: true, hasLLVM: false, isAvailable: false }, js)
+
+  LLVMTarget(llvm) =>
+    target == LLVM
+      ? cardView({ hasJS: false, hasLLVM: true, isAvailable: true }, llvm)
+      : cardView({ hasJS: false, hasLLVM: true, isAvailable: false }, llvm)
+
+  BothTargets(js, llvm) =>
+    target == JS
+      ? cardView({ hasJS: true, hasLLVM: true, isAvailable: true }, js)
+      : cardView({ hasJS: true, hasLLVM: true, isAvailable: true }, llvm)
+}

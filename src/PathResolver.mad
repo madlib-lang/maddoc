@@ -3,7 +3,7 @@ import type { FilePath } from "FilePath/Posix"
 import List from "List"
 import { Just, Nothing } from "Maybe"
 import { always, any, equals, ifElse } from "Function"
-import { drop, split, toLower, len } from "String"
+import { drop, split, toLower, length } from "String"
 import { isRootPathOf, canonicalizePath } from "FilePath/Posix"
 import {} from "Compare"
 
@@ -14,14 +14,16 @@ import type {
   Alias,
   Interface,
   Instance,
-  Type
+  Type,
+  Targeted
 } from "@/Parser/Documentation"
 
+import { getName } from "@/Parser/Documentation"
 
 
 export type PathResult
   = ModuleResult(List Module)
-  | ExpressionResult(String, Expression)
+  | ExpressionResult(String, Targeted Expression)
   | TypeResult(String, Type)
   | AliasResult(String, Alias)
   | InterfaceResult(String, Interface)
@@ -48,13 +50,13 @@ filterByPath = (path) => {
         ),
         pipe(
           always([
-            ...map(.name, module.expressions),
+            ...map(getName, module.expressions),
             ...map(.name, module.typeDeclarations),
             ...map(.name, module.aliases),
             ...map(.name, module.interfaces),
             ...map(.declaration, module.instances)
           ]),
-          map(pipe(mappend(`${module.name}/`), toLower)),
+          map(pipe(mconcat(`${module.name}/`), toLower)),
           any(isRootPathOf(drop(1, toLower(canPath))))
         )
       )
@@ -71,12 +73,15 @@ export getModulesToShow = (state) => pipe(
 
 isItemView :: String -> List Module -> Boolean
 isItemView = (path) => ifElse(
-  pipe(List.len, equals(1)),
+  pipe(List.length, equals(1)),
   pipe(
     List.first,
     where {
-      Just(m) => len(canonicalizePath(path)) > len(`/${m.name}`)
-      Nothing => false
+      Just(m) =>
+        length(canonicalizePath(path)) > length(`/${m.name}`)
+
+      Nothing =>
+        false
     }
   ),
   always(false)
@@ -86,12 +91,16 @@ tryItemByKind :: (a -> b -> PathResult)
   -> (b -> String)
   -> List b
   -> FilePath
-  -> { ...module, name :: a } -> PathResult
-tryItemByKind = (constructor, getName, items, path, module) => pipe(
-  List.find((e) => Just(getName(e)) == List.last(split("/", path))),
+  -> { ...module, name :: a }
+  -> PathResult
+tryItemByKind = (constructor, retrieveName, items, path, module) => pipe(
+  List.find((e) => Just(retrieveName(e)) == List.last(split("/", path))),
   where {
-    Just(found) => constructor(module.name, found)
-    Nothing    => NotFound
+    Just(found) =>
+      constructor(module.name, found)
+
+    Nothing =>
+      NotFound
   }
 )(items)
 
@@ -102,17 +111,21 @@ _findItem :: List Finder -> FilePath -> Module -> PathResult
 _findItem = (finders, path, module) => where(finders) {
   [try, ...others] =>
     where(try(path, module)) {
-      NotFound => _findItem(others, path, module)
-      found => found
+      NotFound =>
+        _findItem(others, path, module)
+
+      found =>
+        found
     }
 
   [] =>
     NotFound
 }
 
+
 findItem :: FilePath -> Module -> PathResult
 findItem = (path, module) => _findItem([
-  tryItemByKind(ExpressionResult, .name, module.expressions),
+  tryItemByKind(ExpressionResult, getName, module.expressions),
   tryItemByKind(TypeResult, .name, module.typeDeclarations),
   tryItemByKind(AliasResult, .name, module.aliases),
   tryItemByKind(InterfaceResult, .name, module.interfaces),

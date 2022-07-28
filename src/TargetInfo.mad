@@ -1,0 +1,5 @@
+export alias TargetInfo = {
+  hasJS :: Boolean,
+  hasLLVM :: Boolean,
+  isAvailable :: Boolean,
+}

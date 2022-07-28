@@ -1,4 +1,6 @@
 import type { Element } from "MadUI"
+import type { State } from "@/State"
+
 import {
   className,
   empty,
@@ -9,7 +11,7 @@ import { always, ifElse } from "Function"
 import { isEmpty } from "String"
 
 
-Since :: { ...a, since :: String } -> Element
+Since :: { ...a, since :: String } -> Element State
 export Since = pipe(
   .since,
   ifElse(

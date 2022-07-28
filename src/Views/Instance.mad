@@ -7,6 +7,8 @@ import {
   li
 } from "MadUI"
 
+import type { State } from "@/State"
+
 import { Etiquette } from "@/Views/Etiquette"
 import { Title } from "@/Views/Title"
 import { Since } from "@/Views/Since"
@@ -16,7 +18,7 @@ import { Example } from "@/Views/Example"
 import type { Instance } from "@/Parser/Documentation"
 
 
-Instance :: String -> Instance -> Element
+Instance :: String -> Instance -> Element State
 export Instance = (moduleName, instanceDef) => {
   constraints  = instanceDef.constraints
   constraintElements =
@@ -25,13 +27,15 @@ export Instance = (moduleName, instanceDef) => {
         <span className="highlight">{` => `}</span>
     ]} else { [] }
 
-  p = Title(instanceDef.declaration, moduleName)
-
   return (
     <li className="definition">
       {...[
           Etiquette("Instance"),
-          Title(instanceDef.declaration, moduleName)
+          Title(
+            instanceDef.declaration,
+            { hasJS: false, hasLLVM: false, isAvailable: false },
+            moduleName
+          )
       ]}
       <div className="definition__interface">
         <span className="highlight">instance </span>

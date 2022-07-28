@@ -1,4 +1,6 @@
 import type { Element } from "MadUI"
+import type { State } from "@/State"
+
 import {
   div,
   span,
@@ -16,7 +18,7 @@ import { Example } from "@/Views/Example"
 import type { Interface } from "@/Parser/Documentation"
 
 
-Interface :: String -> Interface -> Element
+Interface :: String -> Interface -> Element State
 export Interface = (moduleName, interfaceDef) => {
   methods      = interfaceDef.methods
   constraints  = interfaceDef.constraints
@@ -30,7 +32,11 @@ export Interface = (moduleName, interfaceDef) => {
     <li className="definition">
       {...[
           Etiquette("Interface"),
-          Title(interfaceDef.name, moduleName)
+          Title(
+            interfaceDef.name,
+            { hasJS: false, hasLLVM: false, isAvailable: false },
+            moduleName
+          )
       ]}
       <div className="definition__interface">
         <span className="highlight">interface </span>

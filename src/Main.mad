@@ -1,10 +1,15 @@
-import Json from "Json"
+import type { Element, GlobalAction } from "MadUI"
+import type { State, Target } from "@/State"
+import type { Module } from "@/Parser/Documentation"
+import type { PathResult } from "@/PathResolver"
+
+import { JS } from "@/State"
+import Json from "JsonParser"
 import String from "String"
-import { Right } from "Either"
+import { Right, Left } from "Either"
 import docJson from "@/documentation.json"
-import type { Element } from "MadUI"
 import {
-  UrlEvent,
+  PopStateEvent,
   div,
   h2,
   className,
@@ -16,13 +21,15 @@ import {
   p,
   link,
   to,
-  render,
+  renderWithConfig,
+  DEFAULT_CONFIG,
+  addGlobalEventHandler,
   main,
   ul
 } from "MadUI"
-import URL from "URL"
+import Url from "Url"
+import Maybe from "Maybe"
 
-import type { State } from "@/State"
 
 import { Expression } from "@/Views/Expression"
 import { SideMenu } from "@/Views/SideMenu"
@@ -33,10 +40,8 @@ import { Alias } from "@/Views/Alias"
 import { Interface } from "@/Views/Interface"
 import { Instance } from "@/Views/Instance"
 
-import type { Module } from "@/Parser/Documentation"
 import { parser } from "@/Parser/Documentation"
 
-import type { PathResult } from "@/PathResolver"
 import {
   processPath,
   getModulesToShow,
@@ -59,13 +64,23 @@ initialState = where(parsedDocumentation) {
     {
       modules,
       search: "",
-      path: URL.decode(getUrl(()))
+      path: Maybe.fromMaybe("", Url.decode(getUrl({}))),
+      target: JS
     }
+
+  Left(err) => do {
+    return {
+      modules: [],
+      search: "",
+      path: "",
+      target: JS
+    }
+  }
 }
 
 
-ModuleView :: Module -> Element
-ModuleView = (module) =>
+ModuleView :: Target -> Module -> Element State
+ModuleView = (target, module) =>
   <div className="module">
     <h2 className="module__title">
       <link to={`/${module.name}`}>{module.name}</link>
@@ -80,18 +95,18 @@ ModuleView = (module) =>
       {...map(Alias(module.name), module.aliases)}
       {...map(Interface(module.name), module.interfaces)}
       {...map(Instance(module.name), module.instances)}
-      {...map(Expression(module.name), module.expressions)}
+      {...map(Expression(target, module.name), module.expressions)}
     </ul>
   </div>
 
 
-ContentView :: PathResult -> Element
-ContentView = where {
+ContentView :: Target -> PathResult -> Element State
+ContentView = (target, pathResult) => where(pathResult) {
   ModuleResult(modules) =>
-    <div>{...map(ModuleView, modules)}</div>
+    <div>{...map(ModuleView(target), modules)}</div>
 
   ExpressionResult(moduleName, exp) =>
-    <ul className="content__items">{Expression(moduleName, exp)}</ul>
+    <ul className="content__items">{Expression(target, moduleName, exp)}</ul>
 
   TypeResult(moduleName, t) =>
     <ul className="content__items">{Type(moduleName, t)}</ul>
@@ -107,24 +122,32 @@ ContentView = where {
 }
 
 
-DocApp :: State -> Element
+DocApp :: State -> Element State
 DocApp = (state) => {
   modulesInPath = getModulesToShow(state)
   pathResult = processPath(state)
   return (
     <div className="documentation">
-      {Header(())}
+      {Header(state.target)}
       {SideMenu(state.search, state.modules)}
       <main className="documentation__content">
         {Breadcrumbs(state)}
-        {ContentView(pathResult)}
+        {ContentView(state.target, pathResult)}
       </main>
     </div>
   )
 }
 
-onUrlChanged(syncAction((state, event) => where(event) {
-  UrlEvent({ url }) => { ...state, path: URL.decode(url) }
+
+handleUrlChanged :: GlobalAction State
+handleUrlChanged = onUrlChanged(syncAction((state, event) => where(event) {
+  PopStateEvent({ url }) => { ...state, path: Maybe.fromMaybe("", Url.decode(url)) }
 }))
 
-render(DocApp, initialState, "app")
+
+renderWithConfig(
+  addGlobalEventHandler(handleUrlChanged, DEFAULT_CONFIG),
+  DocApp,
+  initialState,
+  "app"
+)

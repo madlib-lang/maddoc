@@ -1,6 +1,8 @@
-import { len, first } from "List"
-import { fromMaybe } from "Maybe"
 import type { Element } from "MadUI"
+import type { State } from "@/State"
+
+import { length, first } from "List"
+import { fromMaybe } from "Maybe"
 import {
   div,
   span,
@@ -18,10 +20,10 @@ import { Example } from "./Example"
 import type { Type } from "@/Parser/Documentation"
 
 
-Type :: String -> Type -> Element
+Type :: String -> Type -> Element State
 export Type = (moduleName, typeDefinition) => {
   constructors   = typeDefinition.constructors
-  manyCtors      = len(constructors) > 1
+  manyCtors      = length(constructors) > 1
 
   renderedConstructors = manyCtors
     ? ConstructorsView("=", constructors)
@@ -36,7 +38,11 @@ export Type = (moduleName, typeDefinition) => {
     <li className="definition">
       {...[
           Etiquette("Type"),
-          Title(typeDefinition.name, moduleName)
+          Title(
+            typeDefinition.name,
+            { hasJS: false, hasLLVM: false, isAvailable: false },
+            moduleName
+          )
       ]}
       <div className="definition__adt">
         <span className="highlight">type</span>
@@ -52,14 +58,14 @@ export Type = (moduleName, typeDefinition) => {
   )
 }
 
-ConstructorsView :: String -> (List String) -> List Element
+ConstructorsView :: String -> (List String) -> List (Element a)
 ConstructorsView = (separator, items) => where(items) {
   [ctor, ...more] => [ConstructorView(separator, ctor), ...ConstructorsView("|", more)]
   [ctor]          => [ConstructorView(separator, ctor)]
   []              => []
 }
 
-ConstructorView :: String -> String -> Element
+ConstructorView :: String -> String -> (Element a)
 ConstructorView = (separator, constructor) =>
   <div className="definition__constructor">
     <span className="highlight">  {separator}</span>

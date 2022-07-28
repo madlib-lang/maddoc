@@ -4,9 +4,10 @@ import {
   className,
   text
 } from "MadUI"
+import type { State } from "@/State"
 
 
-Etiquette :: String -> Element
+Etiquette :: String -> Element State
 export Etiquette = (content) =>
   <div className="definition__etiquette">
     {content}
