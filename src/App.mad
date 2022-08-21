@@ -1,0 +1,142 @@
+import type { Element, GlobalAction } from "MadUI"
+import type { State, Target } from "@/State"
+import type { Module } from "@/Parser/Documentation"
+import type { PathResult } from "@/PathResolver"
+
+import { JS } from "@/State"
+import Json from "JsonParser"
+import String from "String"
+import { Right, Left } from "Either"
+import docJson from "@/documentation.json"
+import {
+  PopStateEvent,
+  div,
+  h2,
+  className,
+  onUrlChanged,
+  syncAction,
+  getUrl,
+  text,
+  empty,
+  p,
+  link,
+  to,
+  main,
+  ul
+} from "MadUI"
+import Url from "Url"
+import Maybe from "Maybe"
+
+
+import { Expression } from "@/Views/Expression"
+import { SideMenu } from "@/Views/SideMenu"
+import { Header } from "@/Views/Header"
+import { Breadcrumbs } from "@/Views/Breadcrumbs"
+import { Type } from "@/Views/Type"
+import { Alias } from "@/Views/Alias"
+import { Interface } from "@/Views/Interface"
+import { Instance } from "@/Views/Instance"
+
+import { parser } from "@/Parser/Documentation"
+
+import {
+  processPath,
+  getModulesToShow,
+  ExpressionResult,
+  TypeResult,
+  AliasResult,
+  InterfaceResult,
+  InstanceResult,
+  ModuleResult
+} from "@/PathResolver"
+
+import { renderMarkdown } from "@/Markdown"
+
+
+parsedDocumentation = Json.parse(parser, docJson)
+
+initialState :: State
+export initialState = where(parsedDocumentation) {
+  Right(modules) =>
+    {
+      modules,
+      search: "",
+      path: Maybe.fromMaybe("", Url.decode(getUrl({}))),
+      target: JS
+    }
+
+  Left(err) => do {
+    return {
+      modules: [],
+      search: "",
+      path: "",
+      target: JS
+    }
+  }
+}
+
+
+ModuleView :: Target -> Module -> Element State
+ModuleView = (target, module) =>
+  <div className="module">
+    <h2 className="module__title">
+      <link to={`/${module.name}`}>{module.name}</link>
+    </h2>
+    {
+      String.isEmpty(module.description)
+        ? <empty />
+        : <p className="module__description">{renderMarkdown(module.description)}</p>
+    }
+    <ul className="content__items">
+      {...map(Type(module.name), module.typeDeclarations)}
+      {...map(Alias(module.name), module.aliases)}
+      {...map(Interface(module.name), module.interfaces)}
+      {...map(Instance(module.name), module.instances)}
+      {...map(Expression(target, module.name), module.expressions)}
+    </ul>
+  </div>
+
+
+ContentView :: Target -> PathResult -> Element State
+ContentView = (target, pathResult) => where(pathResult) {
+  ModuleResult(modules) =>
+    <div>{...map(ModuleView(target), modules)}</div>
+
+  ExpressionResult(moduleName, exp) =>
+    <ul className="content__items">{Expression(target, moduleName, exp)}</ul>
+
+  TypeResult(moduleName, t) =>
+    <ul className="content__items">{Type(moduleName, t)}</ul>
+
+  AliasResult(moduleName, t) =>
+    <ul className="content__items">{Alias(moduleName, t)}</ul>
+
+  InterfaceResult(moduleName, t) =>
+    <ul className="content__items">{Interface(moduleName, t)}</ul>
+
+  InstanceResult(moduleName, t) =>
+    <ul className="content__items">{Instance(moduleName, t)}</ul>
+}
+
+
+DocApp :: State -> Element State
+export DocApp = (state) => {
+  modulesInPath = getModulesToShow(state)
+  pathResult = processPath(state)
+  return (
+    <div className="documentation">
+      {Header(state.target)}
+      {SideMenu(state.search, state.modules)}
+      <main className="documentation__content">
+        {Breadcrumbs(state)}
+        {ContentView(state.target, pathResult)}
+      </main>
+    </div>
+  )
+}
+
+
+handleUrlChanged :: GlobalAction State
+export handleUrlChanged = onUrlChanged(syncAction((state, event) => where(event) {
+  PopStateEvent({ url }) => { ...state, path: Maybe.fromMaybe("", Url.decode(url)) }
+}))
