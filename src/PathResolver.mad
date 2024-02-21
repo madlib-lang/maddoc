@@ -31,6 +31,8 @@ export type PathResult
   | InstanceResult(String, Instance)
   | NotFound
 
+append :: String -> String -> String
+append = (a, b) => a ++ b
 
 filterByPath :: String -> List Module -> List Module
 filterByPath = (path) => {
@@ -59,7 +61,8 @@ filterByPath = (path) => {
           ]),
           map(
             pipe(
-              mconcat(`${module.name}/`),
+              // mconcat(`${module.name}/`),
+              append(`${module.name}/`),
               toLower,
             ),
           ),
