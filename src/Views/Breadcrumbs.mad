@@ -2,7 +2,7 @@ import type { Element } from "MadUI"
 
 import type { State } from "@/State"
 
-import { canonicalizePath, joinPath, splitPath } from "FilePath/Posix"
+import { canonicalizePath, joinPath, splitPath } from "FilePath"
 import { append, intersperseWithIndex, reduce } from "List"
 import {} from "Number"
 import { snd } from "Tuple"

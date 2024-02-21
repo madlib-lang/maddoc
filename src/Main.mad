@@ -1,10 +1,8 @@
-import {
-  renderWithConfig,
-  DEFAULT_CONFIG,
-  addGlobalEventHandler
-} from "MadUI"
+import { DEFAULT_CONFIG, addGlobalEventHandler, renderWithConfig } from "MadUI"
 
 import { DocApp, handleUrlChanged, initialState } from "@/App"
+
+
 
 main :: List String -> {}
 main = () => {
@@ -12,6 +10,6 @@ main = () => {
     addGlobalEventHandler(handleUrlChanged, DEFAULT_CONFIG),
     DocApp,
     initialState,
-    "app"
+    "app",
   )
 }
