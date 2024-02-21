@@ -1,56 +1,55 @@
 import type { Maybe } from "Maybe"
 
-import Json from "JsonParser"
+import Json from "Json/Parse"
 import { Just, Nothing } from "Maybe"
 
+
+
 export alias Instance = {
-  declaration :: String,
   constraints :: String,
-  description  :: String,
-  since        :: String,
-  example      :: String
+  declaration :: String,
+  description :: String,
+  example :: String,
+  since :: String,
 }
 
 export alias Interface = {
-  name        :: String,
-  vars        :: String,
   constraints :: String,
-  methods     :: List String,
-  description  :: String,
-  since        :: String,
-  example      :: String
+  description :: String,
+  example :: String,
+  methods :: List String,
+  name :: String,
+  since :: String,
+  vars :: String,
 }
 
 export alias Alias = {
-  name        :: String,
-  params      :: String,
   aliasedType :: String,
-  description  :: String,
-  since        :: String,
-  example      :: String
+  description :: String,
+  example :: String,
+  name :: String,
+  params :: String,
+  since :: String,
 }
 
 export alias Type = {
-  name         :: String,
-  params       :: String,
   constructors :: List String,
-  description  :: String,
-  since        :: String,
-  example      :: String
+  description :: String,
+  example :: String,
+  name :: String,
+  params :: String,
+  since :: String,
 }
 
 export alias Expression = {
-  name        :: String,
   description :: String,
-  typing      :: String,
-  since       :: String,
-  example     :: String
+  example :: String,
+  name :: String,
+  since :: String,
+  typing :: String,
 }
 
-export type Targeted a
-  = BothTargets(a, a)
-  | JSTarget(a)
-  | LLVMTarget(a)
+export type Targeted a = BothTargets(a, a) | JSTarget(a) | LLVMTarget(a)
 
 
 getName :: Targeted { ...base, name :: String } -> String
@@ -88,38 +87,49 @@ export forJS = (targeted) => where(targeted) {
 }
 
 export alias Module = {
-  path             :: String,
-  name             :: String,
-  description      :: String,
-  expressions      :: List (Targeted Expression),
+  aliases :: List Alias,
+  description :: String,
+  expressions :: List (Targeted Expression),
+  instances :: List Instance,
+  interfaces :: List Interface,
+  name :: String,
+  path :: String,
   typeDeclarations :: List Type,
-  aliases          :: List Alias,
-  interfaces       :: List Interface,
-  instances        :: List Instance
 }
 
 export alias Documentation = List Module
 
 makeInstance :: String -> String -> String -> String -> String -> Instance
-makeInstance = (declaration, constraints, description, since, example) =>
-  ({ declaration, constraints, description, since, example })
+makeInstance = (declaration, constraints, description, since, example) => (
+  { declaration, constraints, description, since, example }
+)
 
-makeInterface :: String -> String -> String -> List String -> String -> String -> String -> Interface
-makeInterface = (name, vars, constraints, methods, description, since, example) =>
-  ({ name, vars, constraints, methods, description, since, example })
+makeInterface :: String
+  -> String
+  -> String
+  -> List String
+  -> String
+  -> String
+  -> String
+  -> Interface
+makeInterface = (name, vars, constraints, methods, description, since, example) => (
+  { name, vars, constraints, methods, description, since, example }
+)
 
 makeAlias :: String -> String -> String -> String -> String -> String -> Alias
-makeAlias = (name, params, aliasedType, description, since, example) =>
-  ({ name, params, aliasedType, description, since, example })
+makeAlias = (name, params, aliasedType, description, since, example) => (
+  { name, params, aliasedType, description, since, example }
+)
 
 makeType :: String -> String -> List String -> String -> String -> String -> Type
-makeType = (name, params, constructors, description, since, example) =>
-  ({ name, params, constructors, description, since, example })
+makeType = (name, params, constructors, description, since, example) => (
+  { name, params, constructors, description, since, example }
+)
 
 makeExpression :: String -> String -> String -> String -> String -> Expression
-makeExpression = (name, description, typing, since, example) => ({
-  name, description, typing, since, example
-})
+makeExpression = (name, description, typing, since, example) => (
+  { name, description, typing, since, example }
+)
 
 makeTargeted :: Maybe a -> Maybe a -> Targeted a
 makeTargeted = (maybeJS, maybeLLVM) => where(#[maybeJS, maybeLLVM]) {
@@ -142,7 +152,7 @@ makeModule :: String
   -> List Interface
   -> List Instance
   -> Module
-makeModule = (path, name, description, expressions, typeDeclarations, aliases, interfaces, instances) => ({
+makeModule = (
   path,
   name,
   description,
@@ -151,7 +161,7 @@ makeModule = (path, name, description, expressions, typeDeclarations, aliases, i
   aliases,
   interfaces,
   instances
-})
+) => ({ path, name, description, expressions, typeDeclarations, aliases, interfaces, instances })
 
 
 
@@ -162,67 +172,85 @@ expressionParser = Json.map5(
   Json.field("description", Json.string),
   Json.field("type", Json.string),
   Json.field("since", Json.string),
-  Json.field("example", Json.string)
+  Json.field("example", Json.string),
 )
 
 
 parser :: Json.Parser Documentation
-export parser = Json.field("modules", Json.list(
-  Json.map8(
-    makeModule,
-    Json.field("path", Json.string),
-    Json.field("moduleName", Json.string),
-    Json.field("description", Json.string),
-    Json.field("expressions", Json.list(
-      Json.map2(
-        makeTargeted,
-        Json.maybe(Json.field("js", expressionParser)),
-        Json.maybe(Json.field("llvm", expressionParser))
-      )
-    )),
-    Json.field("typeDeclarations", Json.list(
-      Json.map6(
-        makeType,
-        Json.path(["js", "name"], Json.string),
-        Json.path(["js", "params"], Json.string),
-        Json.path(["js", "constructors"], Json.list(Json.string)),
-        Json.path(["js", "description"], Json.string),
-        Json.path(["js", "since"], Json.string),
-        Json.path(["js", "example"], Json.string)
-      )
-    )),
-    Json.field("aliases", Json.list(
-      Json.map6(
-        makeAlias,
-        Json.path(["js", "name"], Json.string),
-        Json.path(["js", "params"], Json.string),
-        Json.path(["js", "aliasedType"], Json.string),
-        Json.path(["js", "description"], Json.string),
-        Json.path(["js", "since"], Json.string),
-        Json.path(["js", "example"], Json.string)
-      )
-    )),
-    Json.field("interfaces", Json.list(
-      Json.map7(
-        makeInterface,
-        Json.path(["js", "name"], Json.string),
-        Json.path(["js", "vars"], Json.string),
-        Json.path(["js", "constraints"], Json.string),
-        Json.path(["js", "methods"], Json.list(Json.string)),
-        Json.path(["js", "description"], Json.string),
-        Json.path(["js", "since"], Json.string),
-        Json.path(["js", "example"], Json.string)
-      )
-    )),
-    Json.field("instances", Json.list(
-      Json.map5(
-        makeInstance,
-        Json.path(["js", "declaration"], Json.string),
-        Json.path(["js", "constraints"], Json.string),
-        Json.path(["js", "description"], Json.string),
-        Json.path(["js", "since"], Json.string),
-        Json.path(["js", "example"], Json.string)
-      )
-    ))
-  )
-))
+export parser = Json.field(
+  "modules",
+  Json.list(
+    Json.map8(
+      makeModule,
+      Json.field("path", Json.string),
+      Json.field("moduleName", Json.string),
+      Json.field("description", Json.string),
+      Json.field(
+        "expressions",
+        Json.list(
+          Json.map2(
+            makeTargeted,
+            Json.maybe(Json.field("js", expressionParser)),
+            Json.maybe(Json.field("llvm", expressionParser)),
+          ),
+        ),
+      ),
+      Json.field(
+        "typeDeclarations",
+        Json.list(
+          Json.map6(
+            makeType,
+            Json.path(["js", "name"], Json.string),
+            Json.path(["js", "params"], Json.string),
+            Json.path(["js", "constructors"], Json.list(Json.string)),
+            Json.path(["js", "description"], Json.string),
+            Json.path(["js", "since"], Json.string),
+            Json.path(["js", "example"], Json.string),
+          ),
+        ),
+      ),
+      Json.field(
+        "aliases",
+        Json.list(
+          Json.map6(
+            makeAlias,
+            Json.path(["js", "name"], Json.string),
+            Json.path(["js", "params"], Json.string),
+            Json.path(["js", "aliasedType"], Json.string),
+            Json.path(["js", "description"], Json.string),
+            Json.path(["js", "since"], Json.string),
+            Json.path(["js", "example"], Json.string),
+          ),
+        ),
+      ),
+      Json.field(
+        "interfaces",
+        Json.list(
+          Json.map7(
+            makeInterface,
+            Json.path(["js", "name"], Json.string),
+            Json.path(["js", "vars"], Json.string),
+            Json.path(["js", "constraints"], Json.string),
+            Json.path(["js", "methods"], Json.list(Json.string)),
+            Json.path(["js", "description"], Json.string),
+            Json.path(["js", "since"], Json.string),
+            Json.path(["js", "example"], Json.string),
+          ),
+        ),
+      ),
+      Json.field(
+        "instances",
+        Json.list(
+          Json.map5(
+            makeInstance,
+            Json.path(["js", "declaration"], Json.string),
+            Json.path(["js", "constraints"], Json.string),
+            Json.path(["js", "description"], Json.string),
+            Json.path(["js", "since"], Json.string),
+            Json.path(["js", "example"], Json.string),
+          ),
+        ),
+      ),
+    ),
+  ),
+)
