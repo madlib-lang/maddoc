@@ -1,14 +1,9 @@
 import type { Element } from "MadUI"
+
 import type { State } from "@/State"
 import type { TargetInfo } from "@/TargetInfo"
 
-import {
-  className,
-  empty,
-  h2,
-  span,
-  text
-} from "MadUI"
+import { className, empty, h2, span, text } from "MadUI"
 
 
 
@@ -19,16 +14,24 @@ makeTagClassName = (isWarning) => isWarning
 
 
 TargetTags :: TargetInfo -> List (Element State)
-TargetTags = (targetInfo) => ([
-  targetInfo.hasJS ? <span className={makeTagClassName(!targetInfo.isAvailable)}>JS</span> : <empty />,
-  targetInfo.hasLLVM ? <span className={makeTagClassName(!targetInfo.isAvailable)}>LLVM</span> : <empty />,
-])
+TargetTags = (targetInfo) => {
+  unavailable = !targetInfo.isAvailable
+  unavailableClass = makeTagClassName(unavailable)
+  return [
+    targetInfo.hasJS ? <span className={unavailableClass}>JS</span> : <empty  />,
+    targetInfo.hasLLVM ? <span className={unavailableClass}>LLVM</span> : <empty  />,
+  ]
+}
 
 
 Title :: String -> TargetInfo -> String -> Element State
 export Title = (title, targetInfo, moduleName) =>
   <h2 className="definition__title">
-    <span className="definition__title-span">{title}</span>
+    <span className="definition__title-span">
+      {title}
+    </span>
     {...TargetTags(targetInfo)}
-    <span className="definition__module">{moduleName}</span>
+    <span className="definition__module">
+      {moduleName}
+    </span>
   </h2>

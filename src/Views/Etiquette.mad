@@ -1,14 +1,10 @@
 import type { Element } from "MadUI"
-import {
-  div,
-  className,
-  text
-} from "MadUI"
+
 import type { State } from "@/State"
+
+import { className, div, text } from "MadUI"
+
 
 
 Etiquette :: String -> Element State
-export Etiquette = (content) =>
-  <div className="definition__etiquette">
-    {content}
-  </div>
+export Etiquette = (content) => <div className="definition__etiquette">{content}</div>

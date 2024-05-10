@@ -1,24 +1,26 @@
-import type { FilePath } from "FilePath/Posix"
+import type { Maybe } from "Maybe"
 
+import type {
+  Alias,
+  Expression,
+  Instance,
+  Interface,
+  Module,
+  Targeted,
+  Type,
+} from "@/Parser/Documentation"
+import type { State } from "@/State"
+
+import {} from "Compare"
+import { canonicalizePath, isRootPathOf } from "FilePath"
+import { always, equals, ifElse } from "Function"
+import { any } from "List"
 import List from "List"
 import { Just, Nothing } from "Maybe"
-import { always, any, equals, ifElse } from "Function"
-import { drop, split, toLower, length } from "String"
-import { isRootPathOf, canonicalizePath } from "FilePath/Posix"
-import {} from "Compare"
+import { drop, length, split, toLower } from "String"
 
-import type { State } from "@/State"
-import type {
-  Module,
-  Expression,
-  Alias,
-  Interface,
-  Instance,
-  Type,
-  Targeted
-} from "@/Parser/Documentation"
+import { getName, makeModule } from "@/Parser/Documentation"
 
-import { getName } from "@/Parser/Documentation"
 
 
 export type PathResult
@@ -30,84 +32,121 @@ export type PathResult
   | InstanceResult(String, Instance)
   | NotFound
 
+emptyPaths :: Module -> Boolean
+export emptyPaths = (module) => !List.isEmpty(module.expressions)
+    || !List.isEmpty(module.typeDeclarations)
+    || !List.isEmpty(module.aliases)
+    || !List.isEmpty(module.interfaces)
+    || !List.isEmpty(module.instances)
+
+getPossiblePaths :: Module -> List String
+export getPossiblePaths = (module) => [
+  ...map(getName, module.expressions),
+  ...map(.name, module.typeDeclarations),
+  ...map(.name, module.aliases),
+  ...map(.name, module.interfaces),
+  ...map(.declaration, module.instances),
+]
+
+isParentPath :: String -> String -> Boolean
+export isParentPath = (parent, child) => pipe(
+  canonicalizePath,
+  toLower,
+  drop(1),
+  isRootPathOf($, child),
+)(parent)
+
+walkByPath :: String -> Module -> Boolean
+export walkByPath = (path, module) => pipe(
+  .name,
+  toLower,
+  ifElse(
+    isParentPath(path),
+    always(emptyPaths(module)),
+    pipe(
+      always(getPossiblePaths(module)),
+      map(
+        pipe(
+          mappend(`${module.name}/`),
+          toLower,
+        ),
+      ),
+      any(isParentPath(path)),
+    ),
+  ),
+)(module)
 
 filterByPath :: String -> List Module -> List Module
-filterByPath = (path) => {
-  canPath = canonicalizePath(path)
-
-  return List.filter((module) =>
-    pipe(
-      .name,
-      toLower,
-      ifElse(
-        isRootPathOf(drop(1, toLower(canPath))),
-        always(
-          !List.isEmpty(module.expressions)
-          || !List.isEmpty(module.typeDeclarations)
-          || !List.isEmpty(module.aliases)
-          || !List.isEmpty(module.interfaces)
-          || !List.isEmpty(module.instances)
-        ),
-        pipe(
-          always([
-            ...map(getName, module.expressions),
-            ...map(.name, module.typeDeclarations),
-            ...map(.name, module.aliases),
-            ...map(.name, module.interfaces),
-            ...map(.declaration, module.instances)
-          ]),
-          map(pipe(mconcat(`${module.name}/`), toLower)),
-          any(isRootPathOf(drop(1, toLower(canPath))))
-        )
-      )
-    )(module)
-  )
-}
-
+export filterByPath = (path, modules) => List.filter(walkByPath(path))(modules)
 
 getModulesToShow :: State -> List Module
 export getModulesToShow = (state) => pipe(
   .modules,
-  filterByPath(state.path)
+  filterByPath(state.path),
 )(state)
 
-isItemView :: String -> List Module -> Boolean
-isItemView = (path) => ifElse(
-  pipe(List.length, equals(1)),
-  pipe(
-    List.first,
-    where {
-      Just(m) =>
-        length(canonicalizePath(path)) > length(`/${m.name}`)
+hasLongerPath :: String -> Module -> Boolean
+export hasLongerPath = (path, m) => length(canonicalizePath(path)) > length(`/${m.name}`)
 
-      Nothing =>
-        false
-    }
-  ),
-  always(false)
-)
+firstModuleIsInPath :: String -> Maybe Module -> Boolean
+export firstModuleIsInPath = (path, maybeModule) => where(maybeModule) {
+  Just(m) =>
+    hasLongerPath(path, m)
+
+  Nothing =>
+    false
+}
+
+isItemView :: String -> List Module -> Boolean
+export isItemView = (path, mods) => {
+  IO.putLine(`checking "${path}": ${show(mods)}`)
+  return ifElse(
+    pipe(
+      List.length,
+      equals(1),
+    ),
+    pipe(
+      List.first,
+      firstModuleIsInPath(path),
+    ),
+    always(false),
+  )(mods)
+}
+
+nameMatchesEndOfPath :: String -> (b -> String) -> b -> Boolean
+export nameMatchesEndOfPath = (path, getter, raw) => pipe(
+  split("/"),
+  List.last,
+  where {
+    Just(x) =>
+      x == getter(raw)
+
+    _ =>
+      false
+  },
+)(path)
 
 tryItemByKind :: (a -> b -> PathResult)
   -> (b -> String)
   -> List b
-  -> FilePath
+  -> String
   -> { ...module, name :: a }
   -> PathResult
-tryItemByKind = (constructor, retrieveName, items, path, module) => pipe(
-  List.find((e) => Just(retrieveName(e)) == List.last(split("/", path))),
+export tryItemByKind = (constructor, retrieveName, items, path, module) => pipe(
+  List.find(nameMatchesEndOfPath(path, retrieveName)),
   where {
     Just(found) =>
       constructor(module.name, found)
 
     Nothing =>
       NotFound
-  }
+  },
 )(items)
 
 
-alias Finder = FilePath -> Module -> PathResult
+export alias Finder = String -> Module -> PathResult
 
-_findItem :: List Finder -> FilePath -> Module -> PathResult
+_findItem :: List Finder -> String -> Module -> PathResult
 _findItem = (finders, path, module) => where(finders) {
   [try, ...others] =>
     where(try(path, module)) {
@@ -123,25 +162,45 @@ _findItem = (finders, path, module) => where(finders) {
 }
 
 
-findItem :: FilePath -> Module -> PathResult
-findItem = (path, module) => _findItem([
-  tryItemByKind(ExpressionResult, getName, module.expressions),
-  tryItemByKind(TypeResult, .name, module.typeDeclarations),
-  tryItemByKind(AliasResult, .name, module.aliases),
-  tryItemByKind(InterfaceResult, .name, module.interfaces),
-  tryItemByKind(InstanceResult, .declaration, module.instances)
-], path, module)
+findItem :: String -> Module -> PathResult
+export findItem = (path, module) => _findItem(
+  [
+    tryItemByKind(ExpressionResult, getName, module.expressions),
+    tryItemByKind(TypeResult, .name, module.typeDeclarations),
+    tryItemByKind(AliasResult, .name, module.aliases),
+    tryItemByKind(InterfaceResult, .name, module.interfaces),
+    tryItemByKind(InstanceResult, .declaration, module.instances),
+  ],
+  path,
+  module,
+)
+import IO from "IO"
+
 
 
 processPath :: State -> PathResult
-export processPath = (state) => pipe(
-  getModulesToShow,
-  ifElse(
-    isItemView(state.path),
-    pipe(
-      List.first,
-      where { Just(m) => findItem(state.path, m) }
+export processPath = (state) => {
+  path = state.path
+  return pipe(
+    IO.pTrace("skurp"),
+    getModulesToShow,
+    ifElse(
+      pipe(
+        isItemView(path),
+        IO.pTrace("isITEMVIEW?"),
+      ),
+      pipe(
+        IO.pTrace("yo"),
+        List.first,
+        where {
+          Just(m) =>
+            findItem(path, m)
+
+          Nothing =>
+            NotFound
+        },
+      ),
+      ModuleResult,
     ),
-    ModuleResult
-  )
-)(state)
+  )(state)
+}

@@ -1,0 +1,209 @@
+import { when } from "Function"
+import IO from "IO"
+import List from "List"
+import { Nothing } from "Maybe"
+import { assertEquals, test } from "Test"
+
+import { JSTarget } from "./Parser/Documentation"
+import {
+  AliasResult,
+  ModuleResult,
+  NotFound,
+  emptyPaths,
+  filterByPath,
+  findItem,
+  firstModuleIsInPath,
+  getModulesToShow,
+  getPossiblePaths,
+  hasLongerPath,
+  hasLongerPath,
+  isItemView,
+  isParentPath,
+  nameMatchesEndOfPath,
+  processPath,
+  tryItemByKind,
+  walkByPath,
+} from "./PathResolver"
+import { LLVM } from "./State"
+
+
+
+EMPTY_MODULE = {
+  aliases: [],
+  description: "this is a test",
+  expressions: [],
+  instances: [],
+  interfaces: [],
+  name: "test",
+  path: "path/to/test",
+  typeDeclarations: [],
+}
+
+test(
+  "walkByPath",
+  () => do {
+    _ <- assertEquals(
+      walkByPath(
+        "/a/b/c",
+        {
+          ...EMPTY_MODULE,
+          aliases: [
+            { aliasedType: "", description: "", example: "", name: "/a/b/", params: "", since: "" },
+          ],
+        },
+      ),
+      false,
+    )
+    return assertEquals(walkByPath("/a/b/c", EMPTY_MODULE), false)
+  },
+)
+test(
+  "getModulesToShow",
+  () => do {
+    myModule = {
+      ...EMPTY_MODULE,
+      aliases: [
+        { aliasedType: "", description: "", example: "", name: "/a/b/", params: "", since: "" },
+      ],
+    }
+    return assertEquals(
+      getModulesToShow({ path: "", search: "", target: LLVM, modules: [myModule] }),
+      [myModule],
+    )
+  },
+)
+
+test(
+  "emptyPaths",
+  () => do {
+    _ <- assertEquals(emptyPaths(EMPTY_MODULE), false)
+    return assertEquals(
+      emptyPaths({
+        aliases: [],
+        description: "this is a test",
+        expressions: [
+          JSTarget({
+            description: "this is an expression",
+            example: `import {cool} from "./wherever"`,
+            name: "cool",
+            since: "0.42.20",
+            typing: "String -> Boolean",
+          }),
+        ],
+        instances: [],
+        interfaces: [],
+        name: "test",
+        path: "path/to/test",
+        typeDeclarations: [],
+      }),
+      true,
+    )
+  },
+)
+
+test(
+  "getPossiblePaths",
+  () => do {
+    _ <- assertEquals(getPossiblePaths(EMPTY_MODULE), [])
+    return assertEquals(
+      getPossiblePaths({
+        ...EMPTY_MODULE,
+        aliases: [
+          {
+            aliasedType: "Nice",
+            description: "This is an alias for Nice",
+            example: `import { Cool } from "Cool"`,
+            name: "Cool",
+            params: "a",
+            since: "0.0.1",
+          },
+        ],
+      }),
+      ["Cool"],
+    )
+  },
+)
+
+test("firstModuleIsInPath", () => assertEquals(firstModuleIsInPath("", Nothing), false))
+
+test(
+  "isItemView - true",
+  () => assertEquals(
+    pipe(
+      IO.pTrace("isItemView:t!"),
+      isItemView("/a/b/c"),
+      IO.pTrace("isItemView:t?"),
+    )([EMPTY_MODULE]),
+    true,
+  ),
+)
+
+test(
+  "isItemView - false",
+  () => assertEquals(
+    pipe(
+      IO.pTrace("isItemView:f!"),
+      isItemView("/a/b/c"),
+      IO.pTrace("isItemView:f?"),
+    )([]),
+    false,
+  ),
+)
+
+test(
+  "isParentPath",
+  () => do {
+    _ <- assertEquals(isParentPath("/A/B/C", "/a/b/c/d"), false)
+    return assertEquals(isParentPath("/A/B/C/d", "/a/b/c"), false)
+  },
+)
+
+test("hasLongerPath", () => assertEquals(hasLongerPath("", EMPTY_MODULE), false))
+
+test(
+  "nameMatchesEndOfPath",
+  () => do {
+    _ <- assertEquals(nameMatchesEndOfPath("", .name, { name: "x" }), false)
+    return assertEquals(nameMatchesEndOfPath("/a/b/c", .name, { name: "c" }), true)
+  },
+)
+
+test(
+  "findItem",
+  () => do {
+    aliasX = { aliasedType: "", description: "", example: "", name: "b", params: "", since: "" }
+    aliases = [aliasX]
+
+    _ <- assertEquals(findItem("squibble", { ...EMPTY_MODULE, aliases }), NotFound)
+    return assertEquals(
+      findItem("/z/a/b", { ...EMPTY_MODULE, aliases }),
+      AliasResult("test", aliasX),
+    )
+  },
+)
+
+test(
+  "processPath - non item view",
+  () => do {
+    myModule = {
+      ...EMPTY_MODULE,
+      aliases: [
+        { aliasedType: "", description: "", example: "", name: "/a/b/", params: "", since: "" },
+      ],
+    }
+    return assertEquals(
+      processPath({ path: "", search: "", target: LLVM, modules: [myModule] }),
+      ModuleResult([myModule]),
+    )
+  },
+)
+
+test(
+  "processPath - item view",
+  () => do {
+    return assertEquals(
+      processPath({ path: "/a/b/c", search: "", target: LLVM, modules: [EMPTY_MODULE] }),
+      ModuleResult([EMPTY_MODULE]),
+    )
+  },
+)

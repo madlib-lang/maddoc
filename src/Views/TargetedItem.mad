@@ -1,10 +1,11 @@
 import type { Element } from "MadUI"
-import type { TargetInfo } from "@/TargetInfo"
+
 import type { Targeted } from "@/Parser/Documentation"
 import type { State, Target } from "@/State"
+import type { TargetInfo } from "@/TargetInfo"
 
-import { JSTarget, BothTargets, LLVMTarget } from "@/Parser/Documentation"
-import { LLVM, JS } from "@/State"
+import { BothTargets, JSTarget, LLVMTarget } from "@/Parser/Documentation"
+import { JS, LLVM } from "@/State"
 
 
 
