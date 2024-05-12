@@ -174,23 +174,15 @@ export findItem = (path, module) => _findItem(
   path,
   module,
 )
-import IO from "IO"
-
-
 
 processPath :: State -> PathResult
 export processPath = (state) => {
   path = state.path
   return pipe(
-    IO.pTrace("skurp"),
     getModulesToShow,
     ifElse(
+      isItemView(path),
       pipe(
-        isItemView(path),
-        IO.pTrace("isITEMVIEW?"),
-      ),
-      pipe(
-        IO.pTrace("yo"),
         List.first,
         where {
           Just(m) =>

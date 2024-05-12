@@ -126,29 +126,9 @@ test(
 
 test("firstModuleIsInPath", () => assertEquals(firstModuleIsInPath("", Nothing), false))
 
-test(
-  "isItemView - true",
-  () => assertEquals(
-    pipe(
-      IO.pTrace("isItemView:t!"),
-      isItemView("/a/b/c"),
-      IO.pTrace("isItemView:t?"),
-    )([EMPTY_MODULE]),
-    true,
-  ),
-)
+test("isItemView - true", () => assertEquals(isItemView("/a/b/c", [EMPTY_MODULE]), true))
 
-test(
-  "isItemView - false",
-  () => assertEquals(
-    pipe(
-      IO.pTrace("isItemView:f!"),
-      isItemView("/a/b/c"),
-      IO.pTrace("isItemView:f?"),
-    )([]),
-    false,
-  ),
-)
+test("isItemView - false", () => assertEquals(isItemView("/a/b/c", []), false))
 
 test(
   "isParentPath",
