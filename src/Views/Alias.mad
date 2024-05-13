@@ -1,56 +1,50 @@
 import type { Element } from "MadUI"
-import type { State } from "@/State"
-
-import {
-  div,
-  span,
-  className,
-  text,
-  li
-} from "MadUI"
-import String from "String"
-
-import { Etiquette } from "@/Views/Etiquette"
-import { Title } from "@/Views/Title"
-import { Since } from "@/Views/Since"
-import { Description } from "@/Views/Description"
-import { Example } from "@/Views/Example"
 
 import type { Alias } from "@/Parser/Documentation"
+import type { State } from "@/State"
+
+import { className, div, li, span, text } from "MadUI"
+import String from "String"
+
+import { Description } from "@/Views/Description"
+import { Etiquette } from "@/Views/Etiquette"
+import { Example } from "@/Views/Example"
+import { Since } from "@/Views/Since"
+import { Title } from "@/Views/Title"
+
 
 
 Alias :: String -> Alias -> Element State
 export Alias = (moduleName, aliasDef) => {
   aliasedType = aliasDef.aliasedType
-  params = String.isEmpty(aliasDef.params)
-    ? ""
-    : ` ${aliasDef.params}`
+  params = String.isEmpty(aliasDef.params) ? "" : ` ${aliasDef.params}`
 
   return (
     <li className="definition">
       {...[
-          Etiquette("Alias"),
-          Title(
-            aliasDef.name,
-            { hasJS: false, hasLLVM: false, isAvailable: false },
-            moduleName
-          )
+        Etiquette("Alias"),
+        Title(aliasDef.name, { hasJS: false, hasLLVM: false, isAvailable: false }, moduleName),
       ]}
       <div className="definition__adt">
-        <span className="highlight">alias</span>
-        <span> {aliasDef.name}{params}</span>
+        <span className="highlight">
+          alias
+        </span>
+        <span>
+          {aliasDef.name}
+          {params}
+        </span>
         <span className="definition__constructors">
           <span className="definition__constructor">
-            <span className="highlight"> = </span>
-            <span>{aliasedType}</span>
+            <span className="highlight">
+              = 
+            </span>
+            <span>
+              {aliasedType}
+            </span>
           </span>
         </span>
       </div>
-      {...[
-          Since(aliasDef),
-          Description(aliasDef),
-          Example(aliasDef)
-      ]}
+      {...[Since(aliasDef), Description(aliasDef), Example(aliasDef)]}
     </li>
   )
 }

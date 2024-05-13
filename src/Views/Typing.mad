@@ -1,18 +1,13 @@
 import type { Element } from "MadUI"
+
 import type { State } from "@/State"
 
-import {
-  className,
-  span,
-  text,
-  p
-} from "MadUI"
+import { className, p, span, text } from "MadUI"
+
+
 
 Typing :: { ...a, typing :: String } -> Element State
 export Typing = pipe(
   .typing,
-  (typing) =>
-    <p>
-      <span className="definition__type">{typing}</span>
-    </p>
+  (typing) => <p><span className="definition__type">{typing}</span></p>,
 )

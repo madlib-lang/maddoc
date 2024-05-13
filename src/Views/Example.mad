@@ -1,21 +1,19 @@
 import type { Element } from "MadUI"
+
 import type { State } from "@/State"
 
-import {
-  className,
-  empty,
-  text,
-  p
-} from "MadUI"
 import { always, ifElse } from "Function"
+import { className, empty, p, text } from "MadUI"
 import { isEmpty } from "String"
+
+
 
 Example :: { ...a, example :: String } -> Element State
 export Example = pipe(
   .example,
   ifElse(
     isEmpty,
-    always(<empty />),
-    (example) => <p className="definition__example">{example}</p>
-  )
+    always(<empty  />),
+    (example) => <p className="definition__example">{example}</p>,
+  ),
 )

@@ -1,33 +1,27 @@
 import type { Element } from "MadUI"
-import type { State, Target } from "@/State"
+
 import type { Expression, Targeted } from "@/Parser/Documentation"
+import type { State, Target } from "@/State"
 import type { TargetInfo } from "@/TargetInfo"
 
-import {
-  className,
-  key,
-  li,
-  text
-} from "MadUI"
-import { getName } from "@/Parser/Documentation"
+import { className, key, li, text } from "MadUI"
 
-import { Etiquette } from "@/Views/Etiquette"
-import { Title } from "@/Views/Title"
-import { Since } from "@/Views/Since"
 import { Description } from "@/Views/Description"
+import { Etiquette } from "@/Views/Etiquette"
 import { Example } from "@/Views/Example"
-import { Typing } from "@/Views/Typing"
+import { Since } from "@/Views/Since"
 import { TargetedItem } from "@/Views/TargetedItem"
+import { Title } from "@/Views/Title"
+import { Typing } from "@/Views/Typing"
 
-
-makeKey :: String -> Targeted Expression -> String
-makeKey = (moduleName, targeted) =>
-  `${moduleName}-${getName(targeted)}`
 
 
 ExpressionView :: String -> TargetInfo -> Expression -> Element State
 ExpressionView = (moduleName, targetInfo, definition) =>
-  <li className={`definition${targetInfo.isAvailable ? "" : " definition--greyed-out"}`} key={`${moduleName}-${definition.name}`}>
+  <li
+    className={`definition${targetInfo.isAvailable ? "" : " definition--greyed-out"}`}
+    key={`${moduleName}-${definition.name}`}
+  >
     {Etiquette("Function")}
     {Title(definition.name, targetInfo, moduleName)}
     {Typing(definition)}
@@ -41,5 +35,5 @@ Expression :: Target -> String -> Targeted Expression -> Element State
 export Expression = (target, moduleName, definition) => TargetedItem(
   target,
   definition,
-  ExpressionView(moduleName)
+  ExpressionView(moduleName),
 )

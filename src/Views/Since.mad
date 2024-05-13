@@ -1,14 +1,11 @@
 import type { Element } from "MadUI"
+
 import type { State } from "@/State"
 
-import {
-  className,
-  empty,
-  text,
-  p
-} from "MadUI"
 import { always, ifElse } from "Function"
+import { className, empty, p, text } from "MadUI"
 import { isEmpty } from "String"
+
 
 
 Since :: { ...a, since :: String } -> Element State
@@ -16,7 +13,7 @@ export Since = pipe(
   .since,
   ifElse(
     isEmpty,
-    always(<empty />),
-    (since) => <p className="definition__since">since v{since}</p>
-  )
+    always(<empty  />),
+    (since) => <p className="definition__since">since v{since}</p>,
+  ),
 )

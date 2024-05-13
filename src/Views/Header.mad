@@ -1,55 +1,64 @@
 import type { Action, Element } from "MadUI"
+
 import type { State, Target } from "@/State"
 
-import { JS, LLVM } from "@/State"
+import { always } from "Function"
 import {
+  InputEvent,
   button,
   className,
   div,
-  onClick,
-  onInput,
-  input,
-  placeholder,
-  InputEvent,
-  inputType,
   h1,
   header,
-  syncAction
+  input,
+  inputType,
+  onClick,
+  onInput,
+  placeholder,
+  syncAction,
 } from "MadUI"
 import String from "String"
-import { always } from "Function"
+
+import { JS, LLVM } from "@/State"
+
 
 
 handleInput :: Action State
 handleInput = (state, event) => where(event) {
-  InputEvent(e) => [of(always({ ...state, search: String.toLower(e.target.value) }))]
+  InputEvent(e) =>
+    [of(always({ ...state, search: String.toLower(e.target.value) }))]
 }
 
 
 handleTargetChange :: Target -> Action State
-handleTargetChange = (target) =>
-  syncAction(
-    (state, _) => ({
-      ...state,
-      target
-    })
-  )
+handleTargetChange = (target) => syncAction((state, _) => ({ ...state, target }))
 
 
 Header :: Target -> Element State
-export Header = (target) => 
+export Header = (target) =>
   <header className="header">
-    <h1 className="header__title">MadDoc</h1>
-    <input inputType="text" placeholder="What are you looking for?" className="search-field" onInput={handleInput} />
+    <h1 className="header__title">
+      MadDoc
+    </h1>
+    <input
+      inputType="text"
+      placeholder="What are you looking for?"
+      className="search-field"
+      onInput={handleInput}
+    />
     <div className="target-selector">
       <button
-        className={`target-selector__button${target == JS ? " target-selector__button--selected" : ""}`}
+        className={`target-selector__button${
+          target == JS ? " target-selector__button--selected" : ""
+        }`}
         onClick={handleTargetChange(JS)}
       >
         Javascript
       </button>
       <button
-        className={`target-selector__button${target == LLVM ? " target-selector__button--selected" : ""}`}
+        className={`target-selector__button${
+          target == LLVM ? " target-selector__button--selected" : ""
+        }`}
         onClick={handleTargetChange(LLVM)}
       >
         LLVM
