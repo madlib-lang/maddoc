@@ -99,7 +99,6 @@ export firstModuleIsInPath = (path, maybeModule) => where(maybeModule) {
 
 isItemView :: String -> List Module -> Boolean
 export isItemView = (path, mods) => {
-  IO.putLine(`checking "${path}": ${show(mods)}`)
   return ifElse(
     pipe(
       List.length,
