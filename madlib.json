@@ -8,8 +8,8 @@
   },
   "dependencies": [
     {
-      "minVersion": "2.0.2",
-      "url": "https://github.com/madlib-lang/madmarkdown-renderer/archive/refs/tags/v2.0.2.zip",
+      "minVersion": "2.0.4",
+      "url": "https://github.com/madlib-lang/madmarkdown-renderer/archive/refs/tags/v2.0.4.zip",
       "description": "MadMarkdownRenderer"
     },
     {
