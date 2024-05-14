@@ -19,7 +19,7 @@ import List from "List"
 import { Just, Nothing } from "Maybe"
 import { drop, length, split, toLower } from "String"
 
-import { getName, makeModule } from "@/Parser/Documentation"
+import { getName } from "@/Parser/Documentation"
 
 
 

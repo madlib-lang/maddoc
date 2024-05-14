@@ -34,6 +34,7 @@ import {
   InstanceResult,
   InterfaceResult,
   ModuleResult,
+  NotFound,
   TypeResult,
   processPath,
 } from "@/PathResolver"
@@ -118,6 +119,9 @@ ContentView = (target, pathResult) => where(pathResult) {
     <ul className="content__items">
       {Instance(moduleName, t)}
     </ul>
+
+  NotFound =>
+    <empty  />
 }
 
 
@@ -143,6 +147,9 @@ export handleUrlChanged = onUrlChanged(
     (state, event) => where(event) {
       PopStateEvent({ url }) =>
         { ...state, path: Maybe.fromMaybe("", Url.decode(url)) }
+
+      _ =>
+        state
     },
   ),
 )
