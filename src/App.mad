@@ -22,6 +22,7 @@ import {
   to,
   ul,
 } from "MadUI"
+import { Just, Nothing } from "Maybe"
 import Maybe from "Maybe"
 import String from "String"
 import Url from "Url"
@@ -34,6 +35,7 @@ import {
   InstanceResult,
   InterfaceResult,
   ModuleResult,
+  NotFound,
   TypeResult,
   processPath,
 } from "@/PathResolver"
@@ -118,6 +120,9 @@ ContentView = (target, pathResult) => where(pathResult) {
     <ul className="content__items">
       {Instance(moduleName, t)}
     </ul>
+
+  NotFound =>
+    <empty  />
 }
 
 
@@ -142,7 +147,19 @@ export handleUrlChanged = onUrlChanged(
   syncAction(
     (state, event) => where(event) {
       PopStateEvent({ url }) =>
-        { ...state, path: Maybe.fromMaybe("", Url.decode(url)) }
+        pipe(
+          Url.decode,
+          where {
+            Nothing =>
+              state
+
+            Just(path) =>
+              ({ ...state, path })
+          },
+        )(url)
+
+      _ =>
+        state
     },
   ),
 )

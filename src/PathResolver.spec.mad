@@ -183,7 +183,7 @@ test(
   () => do {
     return assertEquals(
       processPath({ path: "/a/b/c", search: "", target: LLVM, modules: [EMPTY_MODULE] }),
-      ModuleResult([EMPTY_MODULE]),
+      ModuleResult([]),
     )
   },
 )
