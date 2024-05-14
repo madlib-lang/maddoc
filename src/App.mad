@@ -5,6 +5,7 @@ import type { PathResult } from "@/PathResolver"
 import type { State, Target } from "@/State"
 
 import { Left, Right } from "Either"
+import { always, equals, ifElse } from "Function"
 import Json from "Json/Parse"
 import {
   PopStateEvent,
@@ -146,7 +147,11 @@ export handleUrlChanged = onUrlChanged(
   syncAction(
     (state, event) => where(event) {
       PopStateEvent({ url }) =>
-        { ...state, path: Maybe.fromMaybe("", Url.decode(url)) }
+        pipe(
+          Url.decode,
+          Maybe.fromMaybe(""),
+          ifElse(equals(""), always(state), (path) => ({ ...state, path })),
+        )(url)
 
       _ =>
         state
