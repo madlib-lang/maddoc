@@ -5,7 +5,6 @@ import type { PathResult } from "@/PathResolver"
 import type { State, Target } from "@/State"
 
 import { Left, Right } from "Either"
-import { always, equals, ifElse } from "Function"
 import Json from "Json/Parse"
 import {
   PopStateEvent,
@@ -23,6 +22,7 @@ import {
   to,
   ul,
 } from "MadUI"
+import { Just, Nothing } from "Maybe"
 import Maybe from "Maybe"
 import String from "String"
 import Url from "Url"
@@ -149,8 +149,13 @@ export handleUrlChanged = onUrlChanged(
       PopStateEvent({ url }) =>
         pipe(
           Url.decode,
-          Maybe.fromMaybe(""),
-          ifElse(equals(""), always(state), (path) => ({ ...state, path })),
+          where {
+            Nothing =>
+              state
+
+            Just(path) =>
+              ({ ...state, path })
+          },
         )(url)
 
       _ =>
